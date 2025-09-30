@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: chat-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chat-db?createIfnotExist=true
+    username: anas
+    password: anas
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database: postgresql
+    database-platform: org.hibernate.PostgreSQLDialect
+  flyway:
+    enabled: false
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: http://localhost:8080/realms/myapp
+  servlet:
+    multipart:
+      max-file-size: 50MB
+
+
+application:
+    file:
+      uploads:
+        media-output.path: ./uploads
+
+
+
+
