@@ -1,4 +1,4 @@
-# Chat Service - Real-time Messaging Platform
+# Chat Service - Real-Time Messaging Platform
 
 A robust, scalable real-time messaging service built with Spring Boot that enables secure one-to-one chat communication with media sharing capabilities.
 
@@ -23,6 +23,7 @@ graph TD
     C --> F[WebSocket Broker]
     
     subgraph "Chat Service"
+        direction TB
         C --> G[REST Controllers]
         C --> H[Business Services]
         C --> I[Data Repositories]
@@ -191,7 +192,7 @@ sequenceDiagram
 graph LR
     A[WebSocketConfig] --> B[STOMP Endpoint /ws]
     B --> C[Message Broker]
-    C --> D[/user/{userId}/chat]
+    C --> D[User Destinations]
     
     subgraph "Notification Types"
         E[New Message]
@@ -313,7 +314,7 @@ graph LR
 graph TD
     A[MessageService] --> B[FileService]
     B --> C[Local Storage]
-    C --> D[./uploads/users/{userId}/]
+    C --> D[Uploads Directory]
     
     A --> E[MessageRepository]
     E --> F[Database]
