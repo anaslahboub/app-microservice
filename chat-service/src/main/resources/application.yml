@@ -2,7 +2,7 @@ spring:
   application:
     name: chat-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/chat-db?createIfnotExist=true
+    url: jdbc:postgresql://localhost:5432/chat-db
     username: anas
     password: anas
   jpa:
@@ -10,23 +10,24 @@ spring:
       ddl-auto: update
     show-sql: true
     database: postgresql
-    database-platform: org.hibernate.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: false
   security:
     oauth2:
-      authorizationserver:
-        issuer: http://localhost:8080/realms/myapp
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/myapp
+          jwk-set-uri: http://localhost:8080/realms/myapp/protocol/openid-connect/certs
   servlet:
     multipart:
       max-file-size: 50MB
 
-
+springdoc:
+  default-produces-media-type: application/json
 application:
-    file:
-      uploads:
-        media-output.path: ./uploads
-
-
-
-
+  file:
+    uploads:
+      media-output-path: ./uploads
+server:
+  port: 8081

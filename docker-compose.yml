@@ -5,6 +5,7 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: anas
       POSTGRES_PASSWORD: anas
@@ -62,6 +63,19 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+
+#  chat-service:
+#    build: ./chat-service
+#    container_name: chat-service
+#    restart: always
+#    ports:
+#      - 8081:8080
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=docker
+#    depends_on:
+#      - postgres
+#    volumes:
+#      - ./chat-service:/app
 
 volumes:
   postgres_data:

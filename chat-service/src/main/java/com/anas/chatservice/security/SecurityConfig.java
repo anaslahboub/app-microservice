@@ -6,6 +6,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -46,6 +48,13 @@ public class SecurityConfig {
                         auth.jwt(token ->
                                 token.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter())));
         return http.build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        // For development purposes, you might want to use a more specific URL in production
+        return NimbusJwtDecoder.withJwkSetUri("http://localhost:8080/realms/myapp/protocol/openid-connect/certs")
+                .build();
     }
 
     @Bean
