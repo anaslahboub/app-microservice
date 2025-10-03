@@ -14,6 +14,30 @@ The Group Service is a microservice that manages study groups within the educati
 - PostgreSQL database storage
 - OpenAPI/Swagger documentation
 
+## Architecture Diagram
+```mermaid
+graph TD
+    A[Client Applications] --> B[Group Service API]
+    B --> C[Group Controller]
+    C --> D[Group Service]
+    D --> E[Group Repository]
+    E --> F[(PostgreSQL Database)]
+    D --> G[GroupServiceClient]
+    G --> H[Other Services]
+    
+    subgraph "Group Service"
+        B
+        C
+        D
+        E
+    end
+    
+    subgraph "External Systems"
+        F
+        H
+    end
+```
+
 ## API Endpoints
 
 ### Group Management
@@ -56,6 +80,22 @@ The service uses a PostgreSQL database with the following main table:
 ### group_admins
 - group_id (Foreign Key)
 - admin_id
+
+## Workflow Diagram
+```mermaid
+flowchart TD
+    A[User creates group] --> B[Generate unique code]
+    B --> C[Add creator as member and admin]
+    C --> D[Save to database]
+    D --> E[Return group info]
+    
+    F[User joins group] --> G[Validate code]
+    G --> H[Check if already member]
+    H -->|Not member| I[Add to members]
+    H -->|Already member| J[Return existing]
+    I --> K[Save to database]
+    K --> L[Return group info]
+```
 
 ## Configuration
 The service runs on port 8083 by default and connects to a PostgreSQL database named `group-db`.

@@ -14,6 +14,30 @@ The Note Service is a microservice that allows students to create personal notes
 - PostgreSQL database storage
 - OpenAPI/Swagger documentation
 
+## Architecture Diagram
+```mermaid
+graph TD
+    A[Client Applications] --> B[Note Service API]
+    B --> C[Note Controller]
+    C --> D[Note Service]
+    D --> E[Note Repository]
+    E --> F[(PostgreSQL Database)]
+    D --> G[NoteServiceClient]
+    G --> H[Other Services]
+    
+    subgraph "Note Service"
+        B
+        C
+        D
+        E
+    end
+    
+    subgraph "External Systems"
+        F
+        H
+    end
+```
+
 ## API Endpoints
 
 ### Note Management
@@ -29,6 +53,24 @@ The Note Service is a microservice that allows students to create personal notes
 - `GET /api/v1/notes/search` - Search notes by term
 - `GET /api/v1/notes/pinned` - Get pinned notes
 - `GET /api/v1/notes/count` - Get note count
+
+## Workflow Diagram
+```mermaid
+flowchart TD
+    A[User creates note] --> B[Set title and content]
+    B --> C[Associate with group/chat]
+    C --> D[Save to database]
+    D --> E[Return note info]
+    
+    F[User searches notes] --> G[Search in title/content]
+    G --> H[Filter by user]
+    H --> I[Sort by date]
+    I --> J[Return paginated results]
+    
+    K[User pins note] --> L[Update pinned status]
+    L --> M[Save to database]
+    M --> N[Return updated note]
+```
 
 ## Database Schema
 The service uses a PostgreSQL database with the following main table:
