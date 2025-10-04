@@ -74,6 +74,18 @@ public class GroupMemberService {
                 .collect(Collectors.toList());
     }
 
+    public List<GroupMemberDTO> getStudentsByGroupId(Long groupId) {
+        return groupMemberRepository.findStudentsByGroupId(groupId).stream()
+                .map(groupMemberMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<GroupMemberDTO> getAllStudents() {
+        return groupMemberRepository.findAllStudents().stream()
+                .map(groupMemberMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
     public void removeMember(Long groupId, String userId, String requesterId) {
         // Check if requester is admin or co-admin
         if (!isUserAdminOrCoAdmin(groupId, requesterId)) {

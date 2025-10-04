@@ -1,5 +1,7 @@
 package com.anas.groupservice.dto;
 
+import com.anas.groupservice.entity.GroupPostState;
+import com.anas.groupservice.entity.GroupPostType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,22 +13,15 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupMemberDTO {
+public class GroupPostDTO {
     private Long id;
     private Long groupId;
     private String userId;
-    private boolean isAdmin;
-    private boolean coAdmin;
-    private String status;
+    private String content;
+    private GroupPostType type;
+    private GroupPostState state;
+    private String filePath;
+    private String fileName;
     private String createdBy;
     private LocalDateTime createdDate;
-    
-    // Explicit getter and setter methods
-    public boolean getCoAdmin() {
-        return coAdmin;
-    }
-    
-    public void setCoAdmin(boolean coAdmin) {
-        this.coAdmin = coAdmin;
-    }
 }

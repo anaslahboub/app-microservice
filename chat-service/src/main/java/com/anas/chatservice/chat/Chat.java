@@ -54,38 +54,6 @@ public class Chat extends BaseAuditingEntity {
     private List<Message> messages;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
     @Transient
     public String getChatName(String senderId) {
         if (recipient.getId().equals(senderId)) {

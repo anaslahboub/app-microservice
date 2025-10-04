@@ -37,9 +37,17 @@ public class Group extends BaseAuditingEntity {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GroupMember> groupMembers;
 
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<GroupPost> groupPosts;
+
     @Transient
     public int getMemberCount() {
         return groupMembers != null ? groupMembers.size() : 0;
+    }
+
+    @Transient
+    public int getPostCount() {
+        return groupPosts != null ? groupPosts.size() : 0;
     }
 
     @Transient

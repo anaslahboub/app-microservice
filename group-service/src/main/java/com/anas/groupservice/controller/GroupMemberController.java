@@ -31,6 +31,12 @@ public class GroupMemberController {
         return ResponseEntity.ok(members);
     }
 
+    @GetMapping("/students")
+    public ResponseEntity<List<GroupMemberDTO>> getStudentsByGroupId(@PathVariable Long groupId) {
+        List<GroupMemberDTO> students = groupMemberService.getStudentsByGroupId(groupId);
+        return ResponseEntity.ok(students);
+    }
+
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> removeMember(@PathVariable Long groupId,
                                              @PathVariable String userId,

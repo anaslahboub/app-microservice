@@ -21,6 +21,9 @@ spring:
         jwt:
           issuer-uri: http://localhost:8080/realms/myapp
           jwk-set-uri: http://localhost:8080/realms/myapp/protocol/openid-connect/certs
+  servlet:
+    multipart:
+      max-file-size: 50MB
 
 logging:
   level:
@@ -38,3 +41,8 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+application:
+  file:
+    uploads:
+      group-output-path: ./group-uploads

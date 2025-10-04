@@ -13,4 +13,13 @@ public class AddMemberRequest {
     private String userId;
     private boolean isAdmin;
     private boolean coAdmin;
+    
+    // Explicit getter and setter methods
+    public boolean getCoAdmin() {
+        return coAdmin;
+    }
+    
+    public void setCoAdmin(boolean coAdmin) {
+        this.coAdmin = coAdmin;
+    }
 }
