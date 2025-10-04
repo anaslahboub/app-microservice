@@ -98,36 +98,21 @@ export class ChatListComponent {
       }
     }
     
-    // ========================================
-    // STEP 3: HTTP REQUEST PREPARATION
-    // ========================================
-    
-    // Create HTTP parameters for the chat creation API call
-    // These parameters identify who is starting the chat (sender) and who will receive it (receiver)
+
     const params = new HttpParams()
       .set('sender-id', senderId)        // Current user's ID
       .set('receiver-id', contact.id as string);  // Selected contact's ID
     
-    // Construct the API endpoint URL for creating a new chat
     const url = `${this.chatService.rootUrl}/api/v1/chats`;
     
     // Create HTTP context (currently empty, but can be used for additional request metadata)
     const context = new HttpContext();
     
-    // ========================================
-    // STEP 4: API CALL & RESPONSE HANDLING
-    // ========================================
-    
-    // Make HTTP POST request to create the chat
     // firstValueFrom converts the Observable to a Promise for easier handling
     firstValueFrom(
       this.http.post<{response: string}>(url, null, { params, context })
     ).then((res) => {
-      // ========================================
-      // STEP 5: CHAT OBJECT CREATION
-      // ========================================
       
-      // Create a new ChatResponse object with the returned chat ID and contact information
       const chat: ChatResponse = {
         id: res.response,                                    // Chat ID returned from the API
         name: contact.firstName + ' ' + contact.lastName,   // Display name for the chat
@@ -137,26 +122,11 @@ export class ChatListComponent {
         receiverId: contact.id                              // Contact's ID
       };
       
-      // ========================================
-      // STEP 6: UI STATE UPDATES
-      // ========================================
-      
-      // Add the new chat to the beginning of the chats list (most recent first)
       this.chats().unshift(chat);
-      
-      // Hide the contact search interface since chat has been created
       this.searchNewContact = false;
-      
-      // Emit event to notify parent component that a chat has been selected/created
-      // This allows the parent to switch to the chat view or perform other actions
       this.chatSelected.emit(chat);
       
     }).catch(error => {
-      // ========================================
-      // STEP 7: ERROR HANDLING
-      // ========================================
-      
-      // Log any errors that occur during chat creation
       console.error('Error creating chat:', error);
     });
   }
@@ -167,12 +137,6 @@ export class ChatListComponent {
    * @param chat - The chat object that was clicked
    */
   chatClicked(chat: ChatResponse) {
-    // ========================================
-    // EMIT CHAT SELECTION EVENT
-    // ========================================
-    
-    // Emit the selected chat to the parent component
-    // This allows the parent to switch to the chat view or perform other actions
     this.chatSelected.emit(chat);
   }
 
@@ -183,22 +147,10 @@ export class ChatListComponent {
    * @returns Formatted message string with ellipsis if truncated
    */
   wrapMessage(lastMessage: string | undefined): string {
-    // ========================================
-    // STEP 1: VALIDATE MESSAGE EXISTENCE
-    // ========================================
-    
-    // Check if message exists and is within the acceptable length (20 characters or less)
+
     if (lastMessage && lastMessage.length <= 20) {
-      // Return the message as-is if it's short enough
       return lastMessage;
     }
-    
-    // ========================================
-    // STEP 2: TRUNCATE LONG MESSAGES
-    // ========================================
-    
-    // For longer messages, truncate to 17 characters and add ellipsis
-    // This creates a consistent preview length of 20 characters total (17 + '...')
     return lastMessage?.substring(0, 17) + '...';
   }
 }

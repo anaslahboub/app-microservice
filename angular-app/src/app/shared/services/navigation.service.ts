@@ -14,15 +14,22 @@ export class NavigationService {
       isOpen: false
     },
     {
+      icon: 'fas fa-envelope',
+      label: 'Messages',
+      route: '/chat',
+      isOpen: false
+    },
+    {
+      icon: 'fas fa-users-class',
+      label: 'Groups',
+      route: '/groups',
+      isOpen: false
+    },
+    {
       icon: 'fas fa-cog',
       label: 'Settings',
       route: '/settings',
       isOpen: false
-    },
-    {
-      icon: 'fas fa-envelope',
-      label: 'Messages',
-      route: '/chat'
     }
   ];
 

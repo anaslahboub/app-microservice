@@ -1,0 +1,1018 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Group Service API",
+    "description": "API for managing educational groups",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://springdoc.org"
+    },
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8082",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/groups/{id}": {
+      "get": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "getGroupById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "updateGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "deleteGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/groups/{id}/archive": {
+      "put": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "archiveGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/groups": {
+      "get": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "getAllGroups",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "createGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/posts": {
+      "get": {
+        "tags": [
+          "group-post-controller"
+        ],
+        "operationId": "getPublishedPosts",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupPostDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "group-post-controller"
+        ],
+        "operationId": "createPost",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupPostDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/posts/upload": {
+      "post": {
+        "tags": [
+          "group-post-controller"
+        ],
+        "operationId": "uploadFile",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UploadFileRequest"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupPostDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/members": {
+      "get": {
+        "tags": [
+          "group-member-controller"
+        ],
+        "operationId": "getGroupMembers",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupMemberDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "group-member-controller"
+        ],
+        "operationId": "addMember",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMemberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMemberDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/members/{userId}/leave": {
+      "post": {
+        "tags": [
+          "group-member-controller"
+        ],
+        "operationId": "leaveGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/members/{userId}/co-admin": {
+      "post": {
+        "tags": [
+          "group-member-controller"
+        ],
+        "operationId": "designateCoAdmin",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMemberDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/search": {
+      "post": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "searchGroups",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/students": {
+      "get": {
+        "tags": [
+          "student-controller"
+        ],
+        "operationId": "getAllStudents",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupMemberDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistics/groups": {
+      "get": {
+        "tags": [
+          "statistics-controller"
+        ],
+        "operationId": "getGroupStatistics",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupStatisticsDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistics/groups/teacher": {
+      "get": {
+        "tags": [
+          "statistics-controller"
+        ],
+        "operationId": "getGroupStatisticsForTeacher",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupStatisticsDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/posts/{postId}/download": {
+      "get": {
+        "tags": [
+          "group-post-controller"
+        ],
+        "operationId": "downloadFile",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/posts/user/{userId}": {
+      "get": {
+        "tags": [
+          "group-post-controller"
+        ],
+        "operationId": "getPublishedPostsByUser",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupPostDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/members/students": {
+      "get": {
+        "tags": [
+          "group-member-controller"
+        ],
+        "operationId": "getStudentsByGroupId",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupMemberDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/user/{userId}": {
+      "get": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "getGroupsByUserId",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/teacher/{teacherId}": {
+      "get": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "getGroupsByTeacherId",
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/posts/{postId}": {
+      "delete": {
+        "tags": [
+          "group-post-controller"
+        ],
+        "operationId": "deletePost",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/members/{userId}": {
+      "delete": {
+        "tags": [
+          "group-member-controller"
+        ],
+        "operationId": "removeMember",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GroupDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "memberCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateGroupRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        }
+      },
+      "GroupPostDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "groupId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "TEXT",
+              "IMAGE",
+              "VIDEO",
+              "AUDIO",
+              "DOCUMENT",
+              "LINK"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "PUBLISHED",
+              "DELETED"
+            ]
+          },
+          "filePath": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UploadFileRequest": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          }
+        }
+      },
+      "AddMemberRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "coAdmin": {
+            "type": "boolean"
+          },
+          "admin": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GroupMemberDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "groupId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "coAdmin": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "admin": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SearchRequest": {
+        "type": "object",
+        "properties": {
+          "teacherId": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "keyword": {
+            "type": "string"
+          }
+        }
+      },
+      "GroupStatisticsDTO": {
+        "type": "object",
+        "properties": {
+          "totalGroups": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeGroups": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "archivedGroups": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalMembers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "averageMembersPerGroup": {
+            "type": "number",
+            "format": "double"
+          },
+          "mostPopularGroupMemberCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mostPopularGroupName": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

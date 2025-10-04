@@ -1,0 +1,262 @@
+<!-- Group List Component - Advanced Group Management Interface -->
+<div class="group-list-container">
+  
+  <!-- ======================================== -->
+  <!-- HEADER SECTION -->
+  <!-- ======================================== -->
+  <div class="group-list-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h3 class="list-title">
+          <i class="fas fa-users"></i>
+          Groups
+        </h3>
+        <div class="group-stats">
+          <span class="stat-item">
+            <i class="fas fa-list"></i>
+            {{ groupStats.total }} Total
+          </span>
+          <span class="stat-item">
+            <i class="fas fa-check-circle"></i>
+            {{ groupStats.active }} Active
+          </span>
+          <span class="stat-item">
+            <i class="fas fa-user-plus"></i>
+            {{ groupStats.userGroups }} Created
+          </span>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <!-- Search Bar -->
+        <div class="search-container">
+          <div class="search-input-group">
+            <i class="fas fa-search search-icon"></i>
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search groups..."
+              [(ngModel)]="searchTerm"
+              (input)="filterGroups()"
+              (keyup.enter)="filterGroups()">
+            <button 
+              *ngIf="searchTerm" 
+              class="clear-search-btn" 
+              (click)="clearSearch()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+          <button class="filter-btn" (click)="filterGroups()">
+            <i class="fas fa-filter"></i>
+            All
+          </button>
+          <button class="filter-btn" (click)="filterByStatus(false)">
+            <i class="fas fa-check-circle"></i>
+            Active
+          </button>
+          <button class="filter-btn" (click)="filterByStatus(true)">
+            <i class="fas fa-archive"></i>
+            Archived
+          </button>
+        </div>
+        
+        <!-- Create Group Button -->
+        <button class="create-group-btn" (click)="createGroup()">
+          <i class="fas fa-plus"></i>
+          Create Group
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================== -->
+  <!-- GROUPS LIST -->
+  <!-- ======================================== -->
+  <div class="groups-list-container">
+    
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading groups...</p>
+    </div>
+    
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && filteredGroups.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-users-slash"></i>
+      </div>
+      <h4>No Groups Found</h4>
+      <p *ngIf="searchTerm">
+        No groups match your search for "{{ searchTerm }}". Try a different search term.
+      </p>
+      <p *ngIf="!searchTerm">
+        No groups available. Create your first group to get started!
+      </p>
+      <button class="empty-action-btn" (click)="createGroup()">
+        <i class="fas fa-plus"></i>
+        Create Group
+      </button>
+    </div>
+    
+    <!-- Groups Grid -->
+    <div *ngIf="!isLoading && filteredGroups.length > 0" class="groups-grid">
+      
+      <!-- Group Card -->
+      <div *ngFor="let group of filteredGroups" 
+           class="group-card"
+           [class.selected]="selectedGroup?.id === group.id"
+           (click)="selectGroup(group)">
+        
+        <!-- Group Header -->
+        <div class="group-card-header">
+          <div class="group-avatar" [class]="getGroupAvatarColor(group.name)">
+            <i [class]="getGroupIcon(group)"></i>
+          </div>
+          
+          <div class="group-status">
+            <span class="status-badge" [class]="getGroupStatusClass(group)">
+              {{ getGroupStatus(group) }}
+            </span>
+            <span *ngIf="isGroupCreator(group)" class="creator-badge">
+              <i class="fas fa-crown"></i>
+              Creator
+            </span>
+          </div>
+        </div>
+        
+        <!-- Group Info -->
+        <div class="group-card-body">
+          <h4 class="group-name">{{ group.name }}</h4>
+          <p class="group-description">
+            {{ group.description || 'No description available' }}
+          </p>
+          
+          <!-- Group Meta -->
+          <div class="group-meta">
+            <div class="meta-item">
+              <i class="fas fa-users"></i>
+              <span>{{ getMemberCountText(group.memberCount) }}</span>
+            </div>
+            
+            <div class="meta-item" *ngIf="group.subject">
+              <i class="fas fa-book"></i>
+              <span>{{ group.subject }}</span>
+            </div>
+            
+            <div class="meta-item">
+              <i class="fas fa-calendar"></i>
+              <span>{{ getFormattedDate(group.createdDate) }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Group Actions -->
+        <div class="group-card-footer">
+          <div class="group-actions">
+            <button class="action-btn primary" (click)="$event.stopPropagation(); selectGroup(group)">
+              <i class="fas fa-comments"></i>
+              <span>Open</span>
+            </button>
+            
+            <button *ngIf="!isGroupCreator(group)" 
+                    class="action-btn secondary" 
+                    (click)="$event.stopPropagation(); joinGroup(group)">
+              <i class="fas fa-user-plus"></i>
+              <span>Join</span>
+            </button>
+            
+            <button *ngIf="!isGroupCreator(group)" 
+                    class="action-btn danger" 
+                    (click)="$event.stopPropagation(); leaveGroup(group)">
+              <i class="fas fa-user-minus"></i>
+              <span>Leave</span>
+            </button>
+            
+            <button *ngIf="isGroupCreator(group)" 
+                    class="action-btn warning" 
+                    (click)="$event.stopPropagation()">
+              <i class="fas fa-cog"></i>
+              <span>Manage</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Group Tags -->
+        <div class="group-tags" *ngIf="group.subject || group.archived">
+          <span *ngIf="group.subject" class="tag subject-tag">
+            <i class="fas fa-book"></i>
+            {{ group.subject }}
+          </span>
+          <span *ngIf="group.archived" class="tag archived-tag">
+            <i class="fas fa-archive"></i>
+            Archived
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ======================================== -->
+  <!-- PAGINATION (if needed) -->
+  <!-- ======================================== -->
+  <div *ngIf="filteredGroups.length > 12" class="pagination-container">
+    <div class="pagination-info">
+      <span>Showing {{ filteredGroups.length }} groups</span>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================== -->
+<!-- GROUP QUICK ACTIONS MODAL -->
+<!-- ======================================== -->
+<div class="quick-actions-modal" *ngIf="false">
+  <div class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Quick Actions</h3>
+        <button class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="quick-action-item">
+          <i class="fas fa-users"></i>
+          <div class="action-content">
+            <h4>Invite Members</h4>
+            <p>Send invitations to new members</p>
+          </div>
+          <button class="action-btn">
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+        
+        <div class="quick-action-item">
+          <i class="fas fa-share-alt"></i>
+          <div class="action-content">
+            <h4>Share Group</h4>
+            <p>Share group link with others</p>
+          </div>
+          <button class="action-btn">
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+        
+        <div class="quick-action-item">
+          <i class="fas fa-chart-bar"></i>
+          <div class="action-content">
+            <h4>View Analytics</h4>
+            <p>See group activity and statistics</p>
+          </div>
+          <button class="action-btn">
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
