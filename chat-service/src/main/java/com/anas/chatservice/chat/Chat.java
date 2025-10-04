@@ -43,7 +43,7 @@ public class Chat extends BaseAuditingEntity {
     @Id
     @GeneratedValue(strategy = UUID)
     private String id;
-     @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "sender_id")
     private User sender;
     @ManyToOne
@@ -52,6 +52,39 @@ public class Chat extends BaseAuditingEntity {
     @OneToMany(mappedBy = "chat", fetch = FetchType.EAGER)
     @OrderBy("createdDate DESC")
     private List<Message> messages;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
     @Transient
     public String getChatName(String senderId) {

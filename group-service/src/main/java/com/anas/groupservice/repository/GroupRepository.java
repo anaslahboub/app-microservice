@@ -4,27 +4,34 @@ import com.anas.groupservice.entity.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
+@Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
-    
-    @Query("SELECT g FROM Group g WHERE g.code = :code AND g.active = true")
-    Optional<Group> findByCode(@Param("code") String code);
-    
-    @Query("SELECT g FROM Group g WHERE g.createdBy = :userId AND g.active = true")
-    List<Group> findByCreatedBy(@Param("userId") String userId);
-    
-    @Query("SELECT g FROM Group g WHERE :userId IN ELEMENTS(g.memberIds) AND g.active = true")
-    List<Group> findByMemberId(@Param("userId") String userId);
-    
-    @Query("SELECT g FROM Group g WHERE g.name LIKE %:name% AND g.active = true")
-    List<Group> findByNameContainingIgnoreCase(@Param("name") String name);
-    
-    @Query("SELECT CASE WHEN :userId IN ELEMENTS(g.memberIds) THEN true ELSE false END FROM Group g WHERE g.id = :groupId")
-    boolean isMember(@Param("groupId") Long groupId, @Param("userId") String userId);
-    
-    @Query("SELECT CASE WHEN :userId IN ELEMENTS(g.adminIds) THEN true ELSE false END FROM Group g WHERE g.id = :groupId")
-    boolean isAdmin(@Param("groupId") Long groupId, @Param("userId") String userId);
+
+    @Query("SELECT g FROM Group g JOIN g.groupMembers gm WHERE gm.userId = :userId AND g.archived = false")
+    List<Group> findActiveGroupsByUserId(@Param("userId") String userId);
+
+    @Query("SELECT g FROM Group g JOIN g.groupMembers gm WHERE gm.userId = :userId AND g.archived = true")
+    List<Group> findArchivedGroupsByUserId(@Param("userId") String userId);
+
+    @Query("SELECT g FROM Group g WHERE g.createdBy = :teacherId")
+    List<Group> findGroupsByTeacherId(@Param("teacherId") String teacherId);
+
+    @Query("SELECT g FROM Group g WHERE g.subject = :subject AND g.archived = false")
+    List<Group> findActiveGroupsBySubject(@Param("subject") String subject);
+
+    List<Group> findByArchived(boolean archived);
+
+    @Query("SELECT g FROM Group g WHERE " +
+           "(:teacherId IS NULL OR g.createdBy = :teacherId) AND " +
+           "(:subject IS NULL OR g.subject = :subject) AND " +
+           "(:archived IS NULL OR g.archived = :archived) AND " +
+           "(:keyword IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(g.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    List<Group> searchGroups(@Param("teacherId") String teacherId, 
+                            @Param("subject") String subject, 
+                            @Param("archived") Boolean archived, 
+                            @Param("keyword") String keyword);
 }

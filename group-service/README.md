@@ -1,118 +1,73 @@
 # Group Service
 
-## Overview
-The Group Service is a microservice that manages study groups within the education platform. It allows teachers to create groups with unique shareable codes, and students to join these groups using the codes.
+This is a microservice for managing educational groups in a learning platform. It provides functionality for creating and managing groups, members, and real-time notifications.
 
 ## Features
-- Create study groups with unique shareable codes
-- Join/leave groups using codes
-- Role-based access control (members vs admins)
-- Group search and discovery
-- RESTful API with JSON responses
-- Integration with other services via Feign clients
-- OAuth2/JWT authentication with Keycloak
-- PostgreSQL database storage
-- OpenAPI/Swagger documentation
 
-## Architecture Diagram
-```mermaid
-graph TD
-    A[Client Applications] --> B[Group Service API]
-    B --> C[Group Controller]
-    C --> D[Group Service]
-    D --> E[Group Repository]
-    E --> F[(PostgreSQL Database)]
-    D --> G[GroupServiceClient]
-    G --> H[Other Services]
-    
-    subgraph "Group Service"
-        B
-        C
-        D
-        E
-    end
-    
-    subgraph "External Systems"
-        F
-        H
-    end
-```
+### Group Management
+- Teachers can create groups with name, description, and subject
+- Teachers become automatic administrators of their groups
+- Groups can be archived or deleted
+
+### Member Management
+- Admins can add/remove members to/from groups
+- Members can voluntarily leave groups
+- Admins can designate co-administrators
+
+### Role-based Access Control
+- Teachers have admin privileges for their groups
+- Students have limited access to group information
+- Security implemented with OAuth2/JWT via Keycloak
+
+### Real-time Notifications
+- WebSocket support for real-time updates
+- Notifications for member changes, group updates, and archiving
+
+### Search and Statistics
+- Search groups by teacher, subject, or keywords
+- Statistics on group activity and membership
 
 ## API Endpoints
 
 ### Group Management
-- `POST /api/v1/groups` - Create a new group
-- `GET /api/v1/groups/{id}` - Get group by ID
-- `GET /api/v1/groups/code/{code}` - Get group by code
-- `GET /api/v1/groups/my` - Get groups for current user
-- `PUT /api/v1/groups/{id}` - Update group
-- `DELETE /api/v1/groups/{id}` - Delete group
+- `POST /api/groups` - Create a new group
+- `GET /api/groups` - Get all groups
+- `GET /api/groups/{id}` - Get a specific group
+- `GET /api/groups/teacher/{teacherId}` - Get groups by teacher
+- `GET /api/groups/user/{userId}` - Get groups for a user
+- `PUT /api/groups/{id}` - Update a group
+- `DELETE /api/groups/{id}` - Delete a group
+- `PUT /api/groups/{id}/archive` - Archive a group
+- `POST /api/groups/search` - Search groups
 
-### Membership Management
-- `POST /api/v1/groups/join/{code}` - Join group by code
-- `POST /api/v1/groups/{id}/leave` - Leave group
+### Member Management
+- `POST /api/groups/{groupId}/members` - Add a member to a group
+- `GET /api/groups/{groupId}/members` - Get all members of a group
+- `DELETE /api/groups/{groupId}/members/{userId}` - Remove a member from a group
+- `POST /api/groups/{groupId}/members/{userId}/leave` - Leave a group
+- `POST /api/groups/{groupId}/members/{userId}/co-admin` - Designate co-admin
 
-### Administration
-- `POST /api/v1/groups/{id}/admin/{adminId}` - Add admin
-- `DELETE /api/v1/groups/{id}/admin/{adminId}` - Remove admin
+### Statistics
+- `GET /api/statistics/groups` - Get overall group statistics
+- `GET /api/statistics/groups/teacher` - Get statistics for teacher's groups
 
-### User Status
-- `GET /api/v1/groups/{id}/member` - Check if user is member
-- `GET /api/v1/groups/{id}/admin` - Check if user is admin
+## WebSocket Endpoints
+- `/ws` - WebSocket endpoint for real-time notifications
+- `/topic/group/{groupId}` - Group-specific notifications
+- `/user/{userId}/queue/notifications` - User-specific notifications
 
-## Database Schema
-The service uses a PostgreSQL database with the following main table:
-
-### groups
-- id (Primary Key)
-- name (Unique)
-- code (Unique)
-- description
-- created_by
-- active
-- created_date
-- last_modified_date
-
-### group_members
-- group_id (Foreign Key)
-- member_id
-
-### group_admins
-- group_id (Foreign Key)
-- admin_id
-
-## Workflow Diagram
-```mermaid
-flowchart TD
-    A[User creates group] --> B[Generate unique code]
-    B --> C[Add creator as member and admin]
-    C --> D[Save to database]
-    D --> E[Return group info]
-    
-    F[User joins group] --> G[Validate code]
-    G --> H[Check if already member]
-    H -->|Not member| I[Add to members]
-    H -->|Already member| J[Return existing]
-    I --> K[Save to database]
-    K --> L[Return group info]
-```
+## Technologies Used
+- Spring Boot 3.5.6
+- PostgreSQL
+- OAuth2/JWT with Keycloak
+- WebSocket for real-time notifications
+- JPA for data persistence
 
 ## Configuration
-The service runs on port 8083 by default and connects to a PostgreSQL database named `group-db`.
+The service is configured through `application.yml`:
+- Database connection settings
+- OAuth2/JWT configuration for Keycloak
+- WebSocket settings
+- Server port (default: 8082)
 
-## Dependencies
-- Spring Boot
-- Spring Data JPA
-- Spring Security OAuth2
-- PostgreSQL
-- Lombok
-- Spring Cloud OpenFeign
-- SpringDoc OpenAPI
-
-## Feign Client
-The service provides a Feign client for integration with other services:
-`com.anas.groupservice.client.GroupServiceClient`
-
-## Model
-The service provides a model class for use by other services:
-`com.anas.groupservice.model.Group`
+## Running the service

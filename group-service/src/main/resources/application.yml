@@ -1,3 +1,6 @@
+server:
+  port: 8082
+
 spring:
   application:
     name: group-service
@@ -9,10 +12,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-    database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-  flyway:
-    enabled: false
+    properties:
+      hibernate:
+        format_sql: true
   security:
     oauth2:
       resourceserver:
@@ -20,7 +22,19 @@ spring:
           issuer-uri: http://localhost:8080/realms/myapp
           jwk-set-uri: http://localhost:8080/realms/myapp/protocol/openid-connect/certs
 
+logging:
+  level:
+    com.anas.groupservice: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.security: DEBUG
+
+# WebSocket configuration
+websocket:
+  allowed-origins: http://localhost:4200
+
+# Swagger configuration
 springdoc:
-  default-produces-media-type: application/json
-server:
-  port: 8083
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

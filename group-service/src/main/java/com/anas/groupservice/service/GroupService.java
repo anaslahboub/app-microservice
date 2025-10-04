@@ -1,164 +1,143 @@
 package com.anas.groupservice.service;
 
+import com.anas.groupservice.dto.CreateGroupRequest;
+import com.anas.groupservice.dto.GroupDTO;
+import com.anas.groupservice.dto.NotificationDTO;
 import com.anas.groupservice.entity.Group;
+import com.anas.groupservice.entity.GroupMember;
 import com.anas.groupservice.repository.GroupRepository;
+import com.anas.groupservice.repository.GroupMemberRepository;
+import com.anas.groupservice.mapper.GroupMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class GroupService {
-    
+
     private final GroupRepository groupRepository;
-    
-    @Transactional
-    public Group createGroup(String name, String description, String createdBy) {
+    private final GroupMemberRepository groupMemberRepository;
+    private final GroupMapper groupMapper;
+    private final NotificationService notificationService;
+
+    public GroupDTO createGroup(CreateGroupRequest request, String creatorId) {
         Group group = new Group();
-        group.setName(name);
-        group.setDescription(description);
-        group.setCreatedBy(createdBy);
+        group.setName(request.getName());
+        group.setDescription(request.getDescription());
+        group.setSubject(request.getSubject());
+        group.setArchived(false);
+
+        Group savedGroup = groupRepository.save(group);
+
+        // Add creator as admin
+        groupMemberRepository.save(createGroupAdmin(savedGroup, creatorId));
+
+        // Send notification
+        NotificationDTO notification = new NotificationDTO();
+        notification.setType("GROUP_CREATED");
+        notification.setGroupId(savedGroup.getId().toString());
+        notification.setGroupName(savedGroup.getName());
+        notification.setMessage("Group '" + savedGroup.getName() + "' has been created");
+        notification.setUserId(creatorId);
+        notification.setTimestamp(LocalDateTime.now());
         
-        // Generate unique code
-        String code;
-        do {
-            code = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        } while (groupRepository.findByCode(code).isPresent());
-        
-        group.setCode(code);
-        
-        // Add creator as both member and admin
-        group.getMemberIds().add(createdBy);
-        group.getAdminIds().add(createdBy);
-        
-        return groupRepository.save(group);
+        notificationService.sendNotificationToAll(notification);
+
+        return groupMapper.toDTO(savedGroup);
     }
-    
-    public Optional<Group> getGroupById(Long id) {
-        return groupRepository.findById(id);
+
+    public List<GroupDTO> getAllGroups() {
+        return groupRepository.findAll().stream()
+                .map(groupMapper::toDTO)
+                .collect(Collectors.toList());
     }
-    
-    public Optional<Group> getGroupByCode(String code) {
-        return groupRepository.findByCode(code);
+
+    public List<GroupDTO> searchGroups(String teacherId, String subject, Boolean archived, String keyword) {
+        return groupRepository.searchGroups(teacherId, subject, archived, keyword).stream()
+                .map(groupMapper::toDTO)
+                .collect(Collectors.toList());
     }
-    
-    public List<Group> getGroupsCreatedBy(String userId) {
-        return groupRepository.findByCreatedBy(userId);
+
+    public List<GroupDTO> getGroupsByTeacherId(String teacherId) {
+        return groupRepository.findGroupsByTeacherId(teacherId).stream()
+                .map(groupMapper::toDTO)
+                .collect(Collectors.toList());
     }
-    
-    public List<Group> getGroupsForMember(String userId) {
-        return groupRepository.findByMemberId(userId);
+
+    public List<GroupDTO> getActiveGroupsByUserId(String userId) {
+        return groupRepository.findActiveGroupsByUserId(userId).stream()
+                .map(groupMapper::toDTO)
+                .collect(Collectors.toList());
     }
-    
-    @Transactional
-    public Group updateGroup(Long groupId, String name, String description, String userId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
-                
-        if (!group.getAdminIds().contains(userId)) {
-            throw new RuntimeException("Only admins can update the group");
+
+    public List<GroupDTO> getArchivedGroupsByUserId(String userId) {
+        return groupRepository.findArchivedGroupsByUserId(userId).stream()
+                .map(groupMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public GroupDTO getGroupById(Long id) {
+        return groupRepository.findById(id)
+                .map(groupMapper::toDTO)
+                .orElse(null);
+    }
+
+    public GroupDTO updateGroup(Long id, GroupDTO groupDTO) {
+        return groupRepository.findById(id)
+                .map(group -> {
+                    group.setName(groupDTO.getName());
+                    group.setDescription(groupDTO.getDescription());
+                    group.setSubject(groupDTO.getSubject());
+                    group.setArchived(groupDTO.isArchived());
+                    return groupMapper.toDTO(groupRepository.save(group));
+                })
+                .orElse(null);
+    }
+
+    public void deleteGroup(Long id) {
+        Group group = groupRepository.findById(id).orElse(null);
+        if (group != null) {
+            groupRepository.deleteById(id);
+            
+            // Send notification
+            NotificationDTO notification = new NotificationDTO();
+            notification.setType("GROUP_DELETED");
+            notification.setGroupId(id.toString());
+            notification.setGroupName(group.getName());
+            notification.setMessage("Group '" + group.getName() + "' has been deleted");
+            notification.setTimestamp(LocalDateTime.now());
+            
+            notificationService.sendNotificationToAll(notification);
         }
-        
-        if (name != null) {
-            group.setName(name);
-        }
-        
-        if (description != null) {
-            group.setDescription(description);
-        }
-        
-        return groupRepository.save(group);
     }
-    
-    @Transactional
-    public void deleteGroup(Long groupId, String userId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
-                
-        if (!group.getCreatedBy().equals(userId)) {
-            throw new RuntimeException("Only the creator can delete the group");
-        }
-        
-        group.setActive(false);
-        groupRepository.save(group);
+
+    public void archiveGroup(Long id) {
+        groupRepository.findById(id).ifPresent(group -> {
+            group.setArchived(true);
+            Group savedGroup = groupRepository.save(group);
+            
+            // Send notification
+            NotificationDTO notification = new NotificationDTO();
+            notification.setType("GROUP_ARCHIVED");
+            notification.setGroupId(id.toString());
+            notification.setGroupName(group.getName());
+            notification.setMessage("Group '" + group.getName() + "' has been archived");
+            notification.setTimestamp(LocalDateTime.now());
+            
+            notificationService.sendNotificationToAll(notification);
+        });
     }
-    
-    @Transactional
-    public Group joinGroup(String code, String userId) {
-        Group group = groupRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
-                
-        if (!group.getMemberIds().contains(userId)) {
-            group.getMemberIds().add(userId);
-            group = groupRepository.save(group);
-        }
-        
-        return group;
-    }
-    
-    @Transactional
-    public Group leaveGroup(Long groupId, String userId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
-                
-        if (group.getCreatedBy().equals(userId)) {
-            throw new RuntimeException("Creator cannot leave the group");
-        }
-        
-        group.getMemberIds().remove(userId);
-        group.getAdminIds().remove(userId);
-        
-        return groupRepository.save(group);
-    }
-    
-    @Transactional
-    public Group addAdmin(Long groupId, String userId, String adminId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
-                
-        if (!group.getAdminIds().contains(userId)) {
-            throw new RuntimeException("Only admins can add other admins");
-        }
-        
-        if (!group.getMemberIds().contains(adminId)) {
-            throw new RuntimeException("User must be a member to become an admin");
-        }
-        
-        if (!group.getAdminIds().contains(adminId)) {
-            group.getAdminIds().add(adminId);
-            group = groupRepository.save(group);
-        }
-        
-        return group;
-    }
-    
-    @Transactional
-    public Group removeAdmin(Long groupId, String userId, String adminId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
-                
-        if (!group.getAdminIds().contains(userId)) {
-            throw new RuntimeException("Only admins can remove other admins");
-        }
-        
-        if (group.getCreatedBy().equals(adminId)) {
-            throw new RuntimeException("Cannot remove the group creator from admins");
-        }
-        
-        group.getAdminIds().remove(adminId);
-        
-        return groupRepository.save(group);
-    }
-    
-    public boolean isMember(Long groupId, String userId) {
-        return groupRepository.isMember(groupId, userId);
-    }
-    
-    public boolean isAdmin(Long groupId, String userId) {
-        return groupRepository.isAdmin(groupId, userId);
+
+    private GroupMember createGroupAdmin(Group group, String userId) {
+        GroupMember groupMember = new GroupMember();
+        groupMember.setGroup(group);
+        groupMember.setUserId(userId);
+        groupMember.setAdmin(true);
+        groupMember.setCoAdmin(false);
+        groupMember.setStatus("ACTIVE");
+        return groupMember;
     }
 }

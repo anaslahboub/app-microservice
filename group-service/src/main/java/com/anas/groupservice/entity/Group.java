@@ -7,10 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
-
-import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Getter
 @Setter
@@ -19,36 +17,42 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Entity
 @Table(name = "groups")
 public class Group extends BaseAuditingEntity {
+
     @Id
-    @GeneratedValue(strategy = IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
-    @Column(unique = true, nullable = false)
-    private String code;
-
+    @Column(length = 1000)
     private String description;
 
-    private String createdBy;
+    @Column(name = "subject")
+    private String subject;
 
-    @ElementCollection
-    @CollectionTable(name = "group_members", joinColumns = @JoinColumn(name = "group_id"))
-    @Column(name = "member_id")
-    private List<String> memberIds;
+    @Column(name = "is_archived")
+    private boolean archived = false;
 
-    @ElementCollection
-    @CollectionTable(name = "group_admins", joinColumns = @JoinColumn(name = "group_id"))
-    @Column(name = "admin_id")
-    private List<String> adminIds;
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<GroupMember> groupMembers;
 
-    private boolean active = true;
+    @Transient
+    public int getMemberCount() {
+        return groupMembers != null ? groupMembers.size() : 0;
+    }
 
-    @PrePersist
-    public void generateCode() {
-        if (code == null || code.isEmpty()) {
-            code = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        }
+    @Transient
+    public boolean isAdmin(String userId) {
+        if (groupMembers == null) return false;
+        return groupMembers.stream()
+                .anyMatch(gm -> gm.getUserId().equals(userId) && gm.isAdmin());
+    }
+
+    @Transient
+    public boolean isMember(String userId) {
+        if (groupMembers == null) return false;
+        return groupMembers.stream()
+                .anyMatch(gm -> gm.getUserId().equals(userId));
     }
 }
