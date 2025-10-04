@@ -80,7 +80,7 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
   // ========================================
   
   constructor(
-    private keycloakService: KeycloakService,
+    public keycloakService: KeycloakService,
     private groupApiService: GroupApiService
   ) {}
   
@@ -235,7 +235,10 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
       
       const newPost = await this.groupApiService.createPost(
         this.selectedGroup.id!, 
-        postData
+        {
+          ...postData,
+          type: 'TEXT' as 'TEXT'
+        }
       );
       
       // Add to local posts array
@@ -301,7 +304,7 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
       
       const newPost = await this.groupApiService.createPost(
         this.selectedGroup.id!, 
-        postData
+        postData as { content: string; type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'DOCUMENT' | 'LINK' }
       );
       
       this.groupPosts.unshift(newPost);

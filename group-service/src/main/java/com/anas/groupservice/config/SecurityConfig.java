@@ -55,6 +55,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/groups/*/members/*/co-admin").hasAuthority("TEACHER")
                 .requestMatchers(HttpMethod.GET, "/api/groups/**").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/groups/*/members/*/leave").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/admin/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/admin/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2

@@ -26,9 +26,21 @@ export class NavigationService {
       isOpen: false
     },
     {
+      icon: 'fas fa-bell',
+      label: 'Notifications',
+      route: '/notifications',
+      isOpen: false
+    },
+    {
       icon: 'fas fa-cog',
       label: 'Settings',
       route: '/settings',
+      isOpen: false
+    },
+    {
+      icon: 'fas fa-user-shield',
+      label: 'Admin',
+      route: '/admin',
       isOpen: false
     }
   ];

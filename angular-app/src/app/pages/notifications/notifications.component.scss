@@ -1,0 +1,280 @@
+.notifications-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+    color: #2c3e50;
+
+    i {
+      color: #3498db;
+    }
+
+    .unread-count {
+      background: #e74c3c;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      min-width: 24px;
+      text-align: center;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+  }
+}
+
+.notifications-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.notifications-list {
+  .notification-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e9ecef;
+    position: relative;
+    transition: all 0.2s ease;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: #f8f9fa;
+    }
+
+    &.unread {
+      background: #f0f8ff;
+      border-left: 4px solid #3498db;
+    }
+
+    .notification-icon {
+      margin-right: 16px;
+      margin-top: 4px;
+
+      i {
+        font-size: 20px;
+        width: 24px;
+        text-align: center;
+      }
+    }
+
+    .notification-content {
+      flex: 1;
+
+      .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+
+        .notification-title {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+
+        .notification-time {
+          font-size: 12px;
+          color: #6c757d;
+          white-space: nowrap;
+        }
+      }
+
+      .notification-message {
+        margin: 0 0 16px 0;
+        color: #495057;
+        line-height: 1.5;
+      }
+
+      .notification-actions {
+        display: flex;
+        gap: 8px;
+
+        .btn {
+          font-size: 12px;
+          padding: 6px 12px;
+        }
+      }
+    }
+
+    .notification-status {
+      margin-left: 16px;
+      margin-top: 4px;
+
+      .unread-indicator {
+        width: 8px;
+        height: 8px;
+        background: #3498db;
+        border-radius: 50%;
+      }
+    }
+
+    // Type-specific styling
+    &.notification-message {
+      .notification-icon i {
+        color: #28a745;
+      }
+    }
+
+    &.notification-group {
+      .notification-icon i {
+        color: #17a2b8;
+      }
+    }
+
+    &.notification-system {
+      .notification-icon i {
+        color: #6f42c1;
+      }
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  color: #6c757d;
+
+  .empty-icon {
+    margin-bottom: 24px;
+
+    i {
+      font-size: 64px;
+      color: #dee2e6;
+    }
+  }
+
+  h3 {
+    margin: 0 0 12px 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #495057;
+  }
+
+  p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+}
+
+// Button styles
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.btn-secondary {
+    background: #6c757d;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: #5a6268;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &.btn-outline-primary {
+    background: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+
+    &:hover {
+      background: #007bff;
+      color: white;
+    }
+  }
+
+  &.btn-outline-danger {
+    background: transparent;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+
+    &:hover {
+      background: #dc3545;
+      color: white;
+    }
+  }
+
+  &.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .notifications-container {
+    padding: 16px;
+  }
+
+  .notifications-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+
+    .page-title {
+      font-size: 24px;
+    }
+  }
+
+  .notification-item {
+    padding: 16px;
+
+    .notification-header {
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-start;
+
+      .notification-time {
+        font-size: 11px;
+      }
+    }
+
+    .notification-actions {
+      flex-wrap: wrap;
+    }
+  }
+}

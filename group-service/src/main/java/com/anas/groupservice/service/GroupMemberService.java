@@ -46,7 +46,7 @@ public class GroupMemberService {
         groupMember.setGroup(group);
         groupMember.setUserId(request.getUserId());
         groupMember.setAdmin(request.isAdmin());
-        groupMember.setCoAdmin(request.isCoAdmin());
+        groupMember.setCoAdmin(request.getCoAdmin());
         groupMember.setStatus("ACTIVE");
 
         GroupMember savedMember = groupMemberRepository.save(groupMember);

@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { GroupDto } from '../../group-services/models';
 import { GroupApiService } from '../../services/group-api.service';
 import { KeycloakService } from '../../utils/keycloak/KeycloakService';
@@ -12,7 +12,7 @@ import { KeycloakService } from '../../utils/keycloak/KeycloakService';
 @Component({
   selector: 'app-group-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './group-list.component.html',
   styleUrls: ['./group-list.component.scss']
 })

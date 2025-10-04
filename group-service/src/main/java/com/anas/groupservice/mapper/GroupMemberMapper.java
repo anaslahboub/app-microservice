@@ -42,7 +42,7 @@ public class GroupMemberMapper {
         
         groupMember.setUserId(dto.getUserId());
         groupMember.setAdmin(dto.isAdmin());
-        groupMember.setCoAdmin(dto.isCoAdmin());
+        groupMember.setCoAdmin(dto.getCoAdmin());
         groupMember.setStatus(dto.getStatus());
 
         return groupMember;

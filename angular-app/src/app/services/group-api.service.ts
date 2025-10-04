@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Api } from '../group-services/api';
+import { KeycloakService } from '../utils/keycloak/KeycloakService';
 import { 
   createGroup, 
   getAllGroups, 
@@ -47,7 +48,8 @@ export class GroupApiService {
   
   constructor(
     private groupApi: Api,
-    private http: HttpClient
+    private http: HttpClient,
+    private keycloakService: KeycloakService
   ) {}
 
   // ========================================
@@ -161,7 +163,7 @@ export class GroupApiService {
   async searchGroups(searchTerm: string): Promise<GroupDto[]> {
     try {
       const result = await this.groupApi.invoke(searchGroups, { 
-        searchRequest: { searchTerm } 
+        body: { keyword: searchTerm } 
       });
       return result;
     } catch (error) {
@@ -231,7 +233,12 @@ export class GroupApiService {
    */
   async leaveGroup(groupId: number): Promise<void> {
     try {
-      await this.groupApi.invoke(leaveGroup, { groupId });
+      const userId = this.keycloakService.userId;
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+      
+      await this.groupApi.invoke(leaveGroup, { groupId, userId });
       console.log('Left group successfully');
     } catch (error) {
       console.error('Error leaving group:', error);
@@ -265,7 +272,7 @@ export class GroupApiService {
    * @param postData - Post content and metadata
    * @returns Promise with created post
    */
-  async createPost(groupId: number, postData: { content: string; type: string }): Promise<GroupPostDto> {
+  async createPost(groupId: number, postData: { content: string; type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'DOCUMENT' | 'LINK' }): Promise<GroupPostDto> {
     try {
       const result = await this.groupApi.invoke(createPost, { 
         groupId, 
@@ -323,16 +330,20 @@ export class GroupApiService {
    * Uploads a file to the group
    * @param groupId - ID of the group
    * @param file - File to upload
+   * @param content - Optional content for the post
    * @returns Promise with upload result
    */
-  async uploadFile(groupId: number, file: File): Promise<any> {
+  async uploadFile(groupId: number, file: File, content?: string): Promise<any> {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const uploadRequest = {
+        content: content || '',
+        fileName: file.name
+      };
       
       const result = await this.groupApi.invoke(uploadFile, { 
         groupId, 
-        body: formData 
+        request: uploadRequest,
+        body: { file: file }
       });
       return result;
     } catch (error) {
@@ -342,16 +353,16 @@ export class GroupApiService {
   }
 
   /**
-   * Downloads a file from the group
+   * Downloads a file from a group post
    * @param groupId - ID of the group
-   * @param fileId - ID of the file to download
+   * @param postId - ID of the post containing the file
    * @returns Promise with file data
    */
-  async downloadFile(groupId: number, fileId: number): Promise<Blob> {
+  async downloadFile(groupId: number, postId: number): Promise<Blob> {
     try {
       const result = await this.groupApi.invoke$Response(downloadFile, { 
         groupId, 
-        fileId 
+        postId 
       });
       return result.body;
     } catch (error) {
