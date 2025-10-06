@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class BaseAuditingEntity {
+public abstract class   BaseAuditingEntity {
 
     @CreatedBy
     @Column(name = "created_by", updatable = false)

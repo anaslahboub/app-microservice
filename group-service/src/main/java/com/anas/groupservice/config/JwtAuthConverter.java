@@ -23,27 +23,38 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
 
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
+        // Fusionne les rôles standards + ceux du realm Keycloak
         Collection<GrantedAuthority> authorities = Stream.concat(
                 jwtGrantedAuthoritiesConverter.convert(jwt).stream(),
-                extractResourceRoles(jwt).stream()
+                extractRealmRoles(jwt).stream()
         ).collect(Collectors.toSet());
 
+        // Crée le token d’authentification avec les autorités extraites
         return new JwtAuthenticationToken(jwt, authorities, getPrincipalClaimName(jwt));
     }
 
+    /**
+     * Récupère le nom du claim représentant l’utilisateur (ici le "sub" = identifiant unique)
+     */
     private String getPrincipalClaimName(Jwt jwt) {
-        String claimName = JwtClaimNames.SUB;
-        return jwt.getClaim(claimName);
+        return jwt.getClaim(JwtClaimNames.SUB);
     }
 
-    private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt) {
+    /**
+     * Extrait les rôles Keycloak situés dans "realm_access.roles"
+     */
+    private Collection<? extends GrantedAuthority> extractRealmRoles(Jwt jwt) {
         Map<String, Object> realmAccess = jwt.getClaim("realm_access");
-        Collection<String> roles;
-        if (realmAccess == null || (roles = (Collection<String>) realmAccess.get("roles")) == null) {
+
+        if (realmAccess == null || realmAccess.get("roles") == null) {
             return Set.of();
         }
+
+        Collection<String> roles = (Collection<String>) realmAccess.get("roles");
+
+        // Crée une autorité Spring Security pour chaque rôle
         return roles.stream()
-                .map(roleName -> new SimpleGrantedAuthority("ROLE_" + roleName))
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
     }
 }

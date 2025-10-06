@@ -95,4 +95,8 @@ export class NotificationsComponent implements OnInit {
         return 'notification-default';
     }
   }
+
+  trackByNotificationId(index: number, notification: any): any {
+    return notification.id;
+  }
 }

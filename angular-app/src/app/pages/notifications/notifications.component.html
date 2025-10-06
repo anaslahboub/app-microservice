@@ -3,9 +3,11 @@
     <h2 class="page-title">
       <i class="fas fa-bell"></i>
       Notifications
-      <span class="unread-count" *ngIf="getUnreadCount() > 0">
-        {{ getUnreadCount() }}
-      </span>
+      @if (getUnreadCount() > 0) {
+        <span class="unread-count">
+          {{ getUnreadCount() }}
+        </span>
+      }
     </h2>
     
     <div class="header-actions">
@@ -20,52 +22,56 @@
   </div>
 
   <div class="notifications-content">
-    <div class="notifications-list" *ngIf="notifications.length > 0; else noNotifications">
-      <div 
-        class="notification-item" 
-        *ngFor="let notification of notifications; trackBy: trackByNotificationId"
-        [class.unread]="!notification.isRead"
-        [ngClass]="getNotificationClass(notification.type)">
-        
-        <div class="notification-icon">
-          <i [class]="getNotificationIcon(notification.type)"></i>
-        </div>
-        
-        <div class="notification-content">
-          <div class="notification-header">
-            <h4 class="notification-title">{{ notification.title }}</h4>
-            <span class="notification-time">
-              {{ notification.timestamp | date:'short' }}
-            </span>
-          </div>
-          
-          <p class="notification-message">{{ notification.message }}</p>
-          
-          <div class="notification-actions">
-            <button 
-              class="btn btn-sm btn-outline-primary"
-              *ngIf="!notification.isRead"
-              (click)="markAsRead(notification.id)">
-              <i class="fas fa-check"></i>
-              Mark as Read
-            </button>
+    @if (notifications.length > 0) {
+      <div class="notifications-list">
+        @for (notification of notifications; track notification.id) {
+          <div 
+            class="notification-item" 
+            [class.unread]="!notification.isRead"
+            [ngClass]="getNotificationClass(notification.type)">
             
-            <button 
-              class="btn btn-sm btn-outline-danger"
-              (click)="deleteNotification(notification.id)">
-              <i class="fas fa-trash"></i>
-              Delete
-            </button>
+            <div class="notification-icon">
+              <i [class]="getNotificationIcon(notification.type)"></i>
+            </div>
+            
+            <div class="notification-content">
+              <div class="notification-header">
+                <h4 class="notification-title">{{ notification.title }}</h4>
+                <span class="notification-time">
+                  {{ notification.timestamp | date:'short' }}
+                </span>
+              </div>
+              
+              <p class="notification-message">{{ notification.message }}</p>
+              
+              <div class="notification-actions">
+                @if (!notification.isRead) {
+                  <button 
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="markAsRead(notification.id)">
+                    <i class="fas fa-check"></i>
+                    Mark as Read
+                  </button>
+                }
+                
+                <button 
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="deleteNotification(notification.id)">
+                  <i class="fas fa-trash"></i>
+                  Delete
+                </button>
+              </div>
+            </div>
+            
+            @if (!notification.isRead) {
+              <div class="notification-status">
+                <div class="unread-indicator"></div>
+              </div>
+            }
           </div>
-        </div>
-        
-        <div class="notification-status" *ngIf="!notification.isRead">
-          <div class="unread-indicator"></div>
-        </div>
+        }
       </div>
-    </div>
-    
-    <ng-template #noNotifications>
+    } @else {
       <div class="empty-state">
         <div class="empty-icon">
           <i class="fas fa-bell-slash"></i>
@@ -73,6 +79,6 @@
         <h3>No notifications</h3>
         <p>You're all caught up! New notifications will appear here.</p>
       </div>
-    </ng-template>
+    }
   </div>
 </div>

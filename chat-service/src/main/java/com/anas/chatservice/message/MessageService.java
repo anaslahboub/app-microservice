@@ -40,17 +40,17 @@ public class MessageService {
 
         messageRepository.save(message);
 
-        Notification notification = Notification.builder()
-                .chatId(chat.getId())
-                .messageType(messageRequest.getType())
-                .content(messageRequest.getContent())
-                .senderId(messageRequest.getSenderId())
-                .receiverId(messageRequest.getReceiverId())
-                .type(NotificationType.MESSAGE)
-                .chatName(chat.getTargetChatName(message.getSenderId()))
-                .build();
+        Notification notification = new Notification();
+        notification.setChatId(chat.getId());
+        notification.setMessageType(messageRequest.getType());
+        notification.setContent(messageRequest.getContent());
+        notification.setSenderId(messageRequest.getSenderId());
+        notification.setReceiverId(messageRequest.getReceiverId());
+        notification.setType(NotificationType.MESSAGE);
+        notification.setChatName(chat.getTargetChatName(message.getSenderId()));
+        notification.setRead(false);
 
-        notificationService.sendNotification(messageRequest.getReceiverId(), notification);
+        notificationService.createAndSendNotification(messageRequest.getReceiverId(), notification);
     }
 
     public List<MessageResponse> findChatMessages(String chatId) {
@@ -68,14 +68,14 @@ public class MessageService {
 
         messageRepository.setMessagesToSeenByChatId(chatId, MessageState.SEEN);
 
-        Notification notification = Notification.builder()
-                .chatId(chat.getId())
-                .type(NotificationType.SEEN)
-                .receiverId(recipientId)
-                .senderId(getSenderId(chat, authentication))
-                .build();
+        Notification notification = new Notification();
+        notification.setChatId(chat.getId());
+        notification.setType(NotificationType.SEEN);
+        notification.setReceiverId(recipientId);
+        notification.setSenderId(getSenderId(chat, authentication));
+        notification.setRead(false);
 
-        notificationService.sendNotification(recipientId, notification);
+        notificationService.createAndSendNotification(recipientId, notification);
     }
 
     public void uploadMediaMessage(String chatId, MultipartFile file, Authentication authentication) {
@@ -95,16 +95,16 @@ public class MessageService {
         message.setChat(chat);
         messageRepository.save(message);
 
-        Notification notification = Notification.builder()
-                .chatId(chat.getId())
-                .type(NotificationType.IMAGE)
-                .senderId(senderId)
-                .receiverId(receiverId)
-                .messageType(MessageType.IMAGE)
-                .media(FileUtils.readFileFromLocation(filePath))
-                .build();
+        Notification notification = new Notification();
+        notification.setChatId(chat.getId());
+        notification.setType(NotificationType.IMAGE);
+        notification.setSenderId(senderId);
+        notification.setReceiverId(receiverId);
+        notification.setMessageType(MessageType.IMAGE);
+        notification.setMedia(FileUtils.readFileFromLocation(filePath));
+        notification.setRead(false);
 
-        notificationService.sendNotification(receiverId, notification);
+        notificationService.createAndSendNotification(receiverId, notification);
     }
 
     private String getSenderId(Chat chat, Authentication authentication) {

@@ -8,7 +8,6 @@ import com.anas.groupservice.entity.GroupMember;
 import com.anas.groupservice.repository.GroupMemberRepository;
 import com.anas.groupservice.repository.GroupRepository;
 import com.anas.groupservice.mapper.GroupMemberMapper;
-import com.anas.groupservice.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -60,9 +59,10 @@ public class GroupMemberService {
             notification.setGroupName(groupEntity.getName());
             notification.setMessage("User has been added to group '" + groupEntity.getName() + "'");
             notification.setUserId(request.getUserId());
-            notification.setTimestamp(LocalDateTime.now());
+            notification.setTimestamp(LocalDateTime.now().toString());
+            notification.setRead(false);
             
-            notificationService.sendGroupNotification(groupId.toString(), notification);
+            notificationService.createAndSendUserNotification(request.getUserId(), notification);
         }
         
         return groupMemberMapper.toDTO(savedMember);
@@ -111,9 +111,10 @@ public class GroupMemberService {
                         notification.setGroupName(group.getName());
                         notification.setMessage("User has been removed from group '" + group.getName() + "'");
                         notification.setUserId(userId);
-                        notification.setTimestamp(LocalDateTime.now());
+                        notification.setTimestamp(LocalDateTime.now().toString());
+                        notification.setRead(false);
                         
-                        notificationService.sendGroupNotification(groupId.toString(), notification);
+                        notificationService.createAndSendUserNotification(userId, notification);
                     }
                 });
     }
@@ -133,9 +134,11 @@ public class GroupMemberService {
                         notification.setGroupName(group.getName());
                         notification.setMessage("User has left group '" + group.getName() + "'");
                         notification.setUserId(userId);
-                        notification.setTimestamp(LocalDateTime.now());
+                        notification.setTimestamp(LocalDateTime.now().toString());
+                        notification.setRead(false);
                         
-                        notificationService.sendGroupNotification(groupId.toString(), notification);
+                        // Notify group members about the user leaving
+                        notificationService.createAndSendGroupNotification(groupId.toString(), notification);
                     }
                 });
     }
@@ -161,9 +164,10 @@ public class GroupMemberService {
             notification.setGroupName(group.getName());
             notification.setMessage("User has been designated as co-admin for group '" + group.getName() + "'");
             notification.setUserId(userId);
-            notification.setTimestamp(LocalDateTime.now());
+            notification.setTimestamp(LocalDateTime.now().toString());
+            notification.setRead(false);
             
-            notificationService.sendGroupNotification(groupId.toString(), notification);
+            notificationService.createAndSendUserNotification(userId, notification);
         }
         
         return groupMemberMapper.toDTO(updatedMember);

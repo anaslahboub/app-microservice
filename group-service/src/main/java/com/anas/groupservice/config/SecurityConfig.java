@@ -22,9 +22,9 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final Converter<Jwt, AbstractAuthenticationToken> jwtAuthConverter;
+    private final JwtAuthConverter jwtAuthConverter;
 
-    public SecurityConfig(Converter<Jwt, AbstractAuthenticationToken> jwtAuthConverter) {
+    public SecurityConfig(JwtAuthConverter jwtAuthConverter) {
         this.jwtAuthConverter = jwtAuthConverter;
     }
 
@@ -47,18 +47,18 @@ public class SecurityConfig {
                             "/swagger-ui.html",
                             "/ws/**")
                     .permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/groups").hasAuthority("TEACHER")
-                .requestMatchers(HttpMethod.PUT, "/api/groups/**").hasAuthority("TEACHER")
-                .requestMatchers(HttpMethod.DELETE, "/api/groups/**").hasAuthority("TEACHER")
-                .requestMatchers(HttpMethod.POST, "/api/groups/*/members").hasAuthority("TEACHER")
-                .requestMatchers(HttpMethod.DELETE, "/api/groups/*/members/*").hasAuthority("TEACHER")
-                .requestMatchers(HttpMethod.POST, "/api/groups/*/members/*/co-admin").hasAuthority("TEACHER")
-                .requestMatchers(HttpMethod.GET, "/api/groups/**").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/groups/*/members/*/leave").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/admin/**").hasAuthority("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/admin/**").hasAuthority("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasAuthority("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasAuthority("ADMIN")
+                .requestMatchers( "/api/groups").hasAuthority("TEACHER")
+                .requestMatchers( "/api/groups/**").hasAuthority("TEACHER")
+//                .requestMatchers(HttpMethod.DELETE, "/api/groups/**").hasAuthority("TEACHER")
+//                .requestMatchers(HttpMethod.POST, "/api/groups/*/members").hasAuthority("TEACHER")
+//                .requestMatchers(HttpMethod.DELETE, "/api/groups/*/members/*").hasAuthority("TEACHER")
+//                .requestMatchers(HttpMethod.POST, "/api/groups/*/members/*/co-admin").hasAuthority("TEACHER")
+//                .requestMatchers(HttpMethod.GET, "/api/groups/**").authenticated()
+//                .requestMatchers(HttpMethod.POST, "/api/groups/*/members/*/leave").authenticated()
+//                .requestMatchers(HttpMethod.GET, "/api/admin/**").hasAuthority("ADMIN")
+//                .requestMatchers(HttpMethod.POST, "/api/admin/**").hasAuthority("ADMIN")
+//                .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasAuthority("ADMIN")
+//                .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
@@ -71,9 +71,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:4200","http://localhost:8082"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedOrigins(List.of("http://localhost:4200","http://localhost:8082"));
         configuration.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

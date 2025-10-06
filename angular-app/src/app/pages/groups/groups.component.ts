@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { KeycloakService } from '../../utils/keycloak/KeycloakService';
 import { GroupApiService } from '../../services/group-api.service';
-import { GroupListComponent } from '../../components/group-list/group-list.component';
 import { GroupDto, GroupPostDto, GroupMemberDto } from '../../group-services/models';
+import { UserResponse } from '../../chat-services/models';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+
 import * as Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
 
@@ -74,6 +75,12 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
   /** File upload */
   selectedFile: File | null = null;
   uploadProgress = 0;
+  
+  /** Available users for adding to groups */
+  availableUsers: UserResponse[] = [];
+  showAddMemberModal = false;
+  selectedUsersToAdd: Set<string> = new Set();
+  isLoadingAvailableUsers = false;
   
   // ========================================
   // CONSTRUCTOR & LIFECYCLE
@@ -214,6 +221,41 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
   
+  /**
+   * Creates a new group
+   * @param groupName - Name of the new group
+   * @param groupDescription - Description of the new group
+   * @param groupSubject - Subject of the new group
+   */
+  async createNewGroup(groupName: string, groupDescription: string, groupSubject: string): Promise<void> {
+    if (!groupName.trim()) {
+      this.showError('Group name is required');
+      return;
+    }
+
+    try {
+      const groupData = {
+        name: groupName.trim(),
+        description: groupDescription.trim(),
+        subject: groupSubject.trim()
+      };
+
+      const newGroup = await this.groupApiService.createGroup(groupData);
+      
+      // Add the new group to the local groups array
+      this.groups.push(newGroup);
+      
+      // Close the modal
+      this.closeCreateGroupModal();
+      
+      // Show success message
+      console.log('Group created successfully');
+    } catch (error) {
+      console.error('Error creating group:', error);
+      this.showError('Failed to create group');
+    }
+  }
+
   // ========================================
   // POST MANAGEMENT
   // ========================================
@@ -642,4 +684,103 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.showError('Failed to remove member');
     }
   }
+
+  /**
+   * Loads all available users that can be added to a group
+   */
+  async loadAvailableUsers(): Promise<void> {
+    this.isLoadingAvailableUsers = true;
+    try {
+      /*if (!this.selectedGroup || !this.selectedGroup.id) {
+        this.availableUsers = [];
+        return;
+      }*/
+      
+      this.availableUsers = await this.groupApiService.getAvailableUsersForGroup(this.selectedGroup.id);
+      
+      // Filter out the current user to prevent self-add
+      this.availableUsers = this.availableUsers.filter(user => 
+        user.id && user.id !== this.keycloakService.userId
+      );
+      console.log("availible users")
+    } catch (error) {
+      console.error('Error loading available users:', error);
+      this.showError('Failed to load available users');
+      this.availableUsers = [];
+    } finally {
+      this.isLoadingAvailableUsers = false;
+    }
+  }
+
+  /**
+   * Opens the add member modal
+   */
+  async openAddMemberModal(): Promise<void> {
+    if (!this.selectedGroup) return;
+    
+    this.showAddMemberModal = true;
+    this.selectedUsersToAdd.clear();
+    
+    // Ensure we have the latest group members data
+    await this.loadGroupMembers(this.selectedGroup.id!);
+    await this.loadAvailableUsers();
+  }
+
+  /**
+   * Closes the add member modal
+   */
+  closeAddMemberModal(): void {
+    this.showAddMemberModal = false;
+    this.selectedUsersToAdd.clear();
+  }
+
+  /**
+   * Toggles selection of a user to add
+   * @param userId - ID of the user to toggle
+   */
+  toggleUserSelection(userId: string): void {
+    if (this.selectedUsersToAdd.has(userId)) {
+      this.selectedUsersToAdd.delete(userId);
+    } else {
+      this.selectedUsersToAdd.add(userId);
+    }
+  }
+
+  /**
+   * Adds selected users to the current group
+   */
+  async addSelectedUsersToGroup(): Promise<void> {
+    if (!this.selectedGroup || this.selectedUsersToAdd.size === 0) return;
+
+    try {
+      const userIds = Array.from(this.selectedUsersToAdd);
+      let successCount = 0;
+      
+      // Add each user to the group
+      for (const userId of userIds) {
+        try {
+          await this.groupApiService.addMemberToGroup(this.selectedGroup.id!, userId);
+          successCount++;
+        } catch (error) {
+          console.error(`Error adding user ${userId} to group:`, error);
+          // Continue with other users even if one fails
+        }
+      }
+
+      // Reload group members to reflect changes
+      await this.loadGroupMembers(this.selectedGroup.id!);
+      
+      // Close modal and clear selection
+      this.closeAddMemberModal();
+      
+      console.log(`${successCount} users added to group successfully`);
+      if (successCount < userIds.length) {
+        this.showError(`${successCount} of ${userIds.length} users added successfully. Some users could not be added.`);
+      }
+    } catch (error) {
+      console.error('Error adding users to group:', error);
+      this.showError('Failed to add users to group. Please try again.');
+    }
+  }
+
 }

@@ -10,7 +10,7 @@
         <module name="gitway-service" />
         <module name="discovery-service" />
       </profile>
-      <profile name="Annotation profile for post-service" enabled="true">
+      <profile name="Annotation profile for group-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -18,8 +18,8 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.40/lombok-1.18.40.jar" />
         </processorPath>
         <module name="group-service" />
-        <module name="post-service" />
         <module name="chat-service" />
+        <module name="post-service" />
       </profile>
     </annotationProcessing>
   </component>

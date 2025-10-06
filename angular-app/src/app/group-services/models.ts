@@ -7,5 +7,6 @@ export type { GroupDto } from './models/group-dto';
 export type { GroupMemberDto } from './models/group-member-dto';
 export type { GroupPostDto } from './models/group-post-dto';
 export type { GroupStatisticsDto } from './models/group-statistics-dto';
+export type { NotificationDto } from './models/notification-dto';
 export type { SearchRequest } from './models/search-request';
 export type { UploadFileRequest } from './models/upload-file-request';

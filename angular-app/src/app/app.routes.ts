@@ -5,7 +5,6 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { GroupsComponent } from './pages/groups/groups.component';
 import { NotificationsComponent } from './pages/notifications/notifications.component';
-import { AdminComponent } from './pages/admin/admin.component';
 
 export const routes: Routes = [
     { path: 'forbidden', component: ForbiddenComponent },
@@ -14,6 +13,5 @@ export const routes: Routes = [
     { path: 'notifications', component: NotificationsComponent },
     { path: 'dashboard', component: DashboardComponent },
     { path: 'settings', component: SettingsComponent },
-    { path: 'admin', component: AdminComponent },
     { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
 ];

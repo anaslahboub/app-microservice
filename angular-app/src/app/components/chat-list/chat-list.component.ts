@@ -1,10 +1,10 @@
 import {Component, input, InputSignal, output} from '@angular/core';
-import {ChatResponse} from '../../services/models/chat-response';
+import {ChatResponse} from '../../chat-services/models/chat-response';
 import {DatePipe} from '@angular/common';
-import {UserResponse} from '../../services/models/user-response';
-import { Api } from '../../services/api';
+import {UserResponse} from '../../chat-services/models/user-response';
+import { Api } from '../../chat-services/api';
 import { KeycloakService } from '../../utils/keycloak/KeycloakService';
-import { getAllUsers } from '../../services/functions';
+import { getAllUsers } from '../../chat-services/functions';
 import { HttpClient, HttpParams, HttpContext } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -16,7 +16,7 @@ import { firstValueFrom } from 'rxjs';
   imports: [
     DatePipe
   ],
-  styleUrl: './chat-list.component.scss'
+  styleUrls: ['./chat-list.component.scss']
 })
 export class ChatListComponent {
   // ========================================

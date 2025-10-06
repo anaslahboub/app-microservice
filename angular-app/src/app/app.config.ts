@@ -14,7 +14,7 @@ import {
 
 
 const urlCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
-  urlPattern: /^http:\/\/localhost:8081(\/.*)?$/i,
+  urlPattern: /^(http:\/\/localhost:8081|http:\/\/localhost:8082)(\/.*)?$/i,
   bearerPrefix: 'Bearer'
 });
 

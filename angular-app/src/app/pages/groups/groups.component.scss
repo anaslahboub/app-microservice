@@ -1106,6 +1106,139 @@
   }
 }
 
+/* Add Member Section */
+.add-member-section {
+  padding: 1rem;
+  border-bottom: 2px solid #f7fafc;
+}
+
+.add-member-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  }
+}
+
+/* Users List in Add Member Modal */
+.users-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin: 1rem 0;
+  border: 2px solid #e2e8f0;
+  border-radius: 15px;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f7fafc;
+
+  &:hover {
+    background: #f7fafc;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.user-select-indicator {
+  margin-right: 1rem;
+  
+  i {
+    font-size: 1.2rem;
+    
+    &.selected {
+      color: #48bb78;
+    }
+  }
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-right: 1rem;
+}
+
+.user-info {
+  flex: 1;
+
+  .user-name {
+    display: block;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+  }
+
+  .user-email {
+    color: #718096;
+    font-size: 0.9rem;
+  }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #718096;
+
+  i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #a0aec0;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #718096;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+}
+
 /* Settings Content */
 .settings-content {
   flex: 1;

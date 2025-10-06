@@ -42,7 +42,7 @@ public class GroupService {
         notification.setGroupName(savedGroup.getName());
         notification.setMessage("Group '" + savedGroup.getName() + "' has been created");
         notification.setUserId(creatorId);
-        notification.setTimestamp(LocalDateTime.now());
+        notification.setTimestamp(LocalDateTime.now().toString());
         
         notificationService.sendNotificationToAll(notification);
 
@@ -108,7 +108,7 @@ public class GroupService {
             notification.setGroupId(id.toString());
             notification.setGroupName(group.getName());
             notification.setMessage("Group '" + group.getName() + "' has been deleted");
-            notification.setTimestamp(LocalDateTime.now());
+            notification.setTimestamp(LocalDateTime.now().toString());
             
             notificationService.sendNotificationToAll(notification);
         }
@@ -125,7 +125,7 @@ public class GroupService {
             notification.setGroupId(id.toString());
             notification.setGroupName(group.getName());
             notification.setMessage("Group '" + group.getName() + "' has been archived");
-            notification.setTimestamp(LocalDateTime.now());
+            notification.setTimestamp(LocalDateTime.now().toString());
             
             notificationService.sendNotificationToAll(notification);
         });

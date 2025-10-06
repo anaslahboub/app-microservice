@@ -1,30 +1,29 @@
 import {AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ChatResponse} from '../../services/models/chat-response';
+import {ChatResponse} from '../../chat-services/models/chat-response';
 import {DatePipe} from '@angular/common';
 import * as Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
 import {FormsModule} from '@angular/forms';
-import {MessageRequest} from '../../services/models/message-request';
 import {PickerComponent} from '@ctrl/ngx-emoji-mart';
-import { MessageResponse } from '../../services/models';
-import { ChatListComponent } from '../../components/chat-list/chat-list.component';
+import { MessageRequest, MessageResponse } from '../../chat-services/models';
 import { KeycloakService } from '../../utils/keycloak/KeycloakService';
-import { Api } from '../../services/api';
-import { getChatsByReceiver } from '../../services/fn/chats/get-chats-by-receiver';
-import { getAllMessages } from '../../services/fn/message/get-all-messages';
-import { saveMessage } from '../../services/fn/message/save-message';
-import { setMessageToSeen } from '../../services/fn/message/set-message-to-seen';
-import { uploadMedia as uploadMediaApi } from '../../services/fn/message/upload-media';
+import { getChatsByReceiver } from '../../chat-services/fn/chats/get-chats-by-receiver';
+import { getAllMessages } from '../../chat-services/fn/message/get-all-messages';
+import { saveMessage } from '../../chat-services/fn/message/save-message';
+import { setMessageToSeen } from '../../chat-services/fn/message/set-message-to-seen';
+import { uploadMedia as uploadMediaApi } from '../../chat-services/fn/message/upload-media';
 import { Notification } from '../models/notification';
+import { Api } from '../../chat-services/api';
+import { ChatListComponent } from '../../components/chat-list/chat-list.component';
 
 @Component({
   selector: 'app-main',
   standalone: true,
   imports: [
-    ChatListComponent,
     DatePipe,
     PickerComponent,
-    FormsModule
+    FormsModule,
+    ChatListComponent
   ],
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss']

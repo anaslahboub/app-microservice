@@ -2,6 +2,7 @@ package com.anas.groupservice.service;
 
 import com.anas.groupservice.dto.FileDownloadDTO;
 import com.anas.groupservice.dto.GroupPostDTO;
+import com.anas.groupservice.dto.NotificationDTO;
 import com.anas.groupservice.dto.UploadFileRequest;
 import com.anas.groupservice.entity.Group;
 import com.anas.groupservice.entity.GroupPost;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,7 @@ public class GroupPostService {
     private final GroupRepository groupRepository;
     private final GroupPostMapper groupPostMapper;
     private final FileService fileService;
+    private final NotificationService notificationService;
 
     public GroupPostDTO createPost(GroupPostDTO postDTO) {
         Group group = groupRepository.findById(postDTO.getGroupId())
@@ -36,6 +39,19 @@ public class GroupPostService {
         groupPost.setState(GroupPostState.PUBLISHED);
 
         GroupPost savedPost = groupPostRepository.save(groupPost);
+        
+        // Send notification about new post
+        NotificationDTO notification = new NotificationDTO();
+        notification.setType("NEW_POST");
+        notification.setGroupId(postDTO.getGroupId().toString());
+        notification.setGroupName(group.getName());
+        notification.setMessage("New post in group '" + group.getName() + "'");
+        notification.setUserId(postDTO.getUserId());
+        notification.setTimestamp(LocalDateTime.now().toString());
+        notification.setRead(false);
+        
+        notificationService.createAndSendGroupNotification(postDTO.getGroupId().toString(), notification);
+        
         return groupPostMapper.toDTO(savedPost);
     }
 
@@ -64,6 +80,19 @@ public class GroupPostService {
         groupPost.setFileName(file.getOriginalFilename());
 
         GroupPost savedPost = groupPostRepository.save(groupPost);
+        
+        // Send notification about new file post
+        NotificationDTO notification = new NotificationDTO();
+        notification.setType("NEW_FILE");
+        notification.setGroupId(groupId.toString());
+        notification.setGroupName(group.getName());
+        notification.setMessage("New file uploaded to group '" + group.getName() + "'");
+        notification.setUserId(userId);
+        notification.setTimestamp(LocalDateTime.now().toString());
+        notification.setRead(false);
+        
+        notificationService.createAndSendGroupNotification(groupId.toString(), notification);
+        
         return groupPostMapper.toDTO(savedPost);
     }
 
@@ -104,6 +133,21 @@ public class GroupPostService {
         groupPostRepository.findById(postId).ifPresent(post -> {
             post.setState(GroupPostState.DELETED);
             groupPostRepository.save(post);
+            
+            // Send notification about deleted post
+            Group group = post.getGroup();
+            if (group != null) {
+                NotificationDTO notification = new NotificationDTO();
+                notification.setType("POST_DELETED");
+                notification.setGroupId(group.getId().toString());
+                notification.setGroupName(group.getName());
+                notification.setMessage("Post deleted from group '" + group.getName() + "'");
+                notification.setUserId(post.getUserId());
+                notification.setTimestamp(LocalDateTime.now().toString());
+                notification.setRead(false);
+                
+                notificationService.createAndSendGroupNotification(group.getId().toString(), notification);
+            }
         });
     }
     

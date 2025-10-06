@@ -6,7 +6,7 @@
   </div>
   <div class="sidebar-menu">
     <ul>
-      <ng-container *ngFor="let item of menuItems">
+      @for (item of menuItems; track item) {
         <li class="sidebar-menu-item">
           <a
             [routerLink]="item.route"
@@ -21,31 +21,33 @@
           >
             <i [class]="item.icon"></i>
             <span class="sidebar-item-text">{{ item.label }}</span>
-            <i
-              *ngIf="item.children && !isSidebarCollapsed"
-              class="fas fa-chevron-down sidebar-item-arrow"
-              [ngClass]="{ rotated: item.isOpen }"
-            ></i>
+            @if (item.children && !isSidebarCollapsed) {
+              <i
+                class="fas fa-chevron-down sidebar-item-arrow"
+                [ngClass]="{ rotated: item.isOpen }"
+              ></i>
+            }
           </a>
 
-          <ul
-            *ngIf="item.children && !isSidebarCollapsed && item.isOpen"
-            class="sidebar-submenu"
-          >
-            <li *ngFor="let child of item.children">
-              <a 
-                [routerLink]="child.route" 
-                routerLinkActive="active" 
-                [routerLinkActiveOptions]="{ exact: true }"
-                class="sidebar-item sidebar-subitem"
-              >
-                <i [class]="child.icon"></i>
-                <span class="sidebar-item-text">{{ child.label }}</span>
-              </a>
-            </li>
-          </ul>
+          @if (item.children && !isSidebarCollapsed && item.isOpen) {
+            <ul class="sidebar-submenu">
+              @for (child of item.children; track child) {
+                <li>
+                  <a 
+                    [routerLink]="child.route" 
+                    routerLinkActive="active" 
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    class="sidebar-item sidebar-subitem"
+                  >
+                    <i [class]="child.icon"></i>
+                    <span class="sidebar-item-text">{{ child.label }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
         </li>
-      </ng-container>
+      }
     </ul>
   </div>
 </div>

@@ -1,425 +1,247 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Api } from '../group-services/api';
-import { KeycloakService } from '../utils/keycloak/KeycloakService';
-import { 
-  createGroup, 
-  getAllGroups, 
-  getGroupById, 
-  updateGroup, 
-  deleteGroup, 
-  archiveGroup,
-  searchGroups,
-  getGroupsByUserId,
-  getGroupsByTeacherId,
-  addMember,
-  removeMember,
-  leaveGroup,
-  designateCoAdmin,
-  getGroupMembers,
-  getStudentsByGroupId,
-  createPost,
-  getPublishedPosts,
-  getPublishedPostsByUser,
-  deletePost,
-  uploadFile,
-  downloadFile,
-  getAllStudents,
-  getGroupStatistics,
-  getGroupStatisticsForTeacher
-} from '../group-services/functions';
-import { 
-  GroupDto, 
-  GroupMemberDto, 
-  GroupPostDto, 
-  CreateGroupRequest, 
-  AddMemberRequest,
-  GroupStatisticsDto
-} from '../group-services/models';
+import { firstValueFrom } from 'rxjs';
+import { ApiConfiguration } from '../group-services/api-configuration';
+import { GroupDto, GroupMemberDto, GroupPostDto } from '../group-services/models';
+import { UserResponse } from '../chat-services/models';
 
-/**
- * Comprehensive Group API Service
- * Wraps all group-related functionality with enhanced error handling and user experience
- */
+// Import the generated API functions
+import { getGroupsByUserId } from '../group-services/fn/group-controller/get-groups-by-user-id';
+import { getGroupMembers } from '../group-services/fn/group-member-controller/get-group-members';
+import { getStudentsByGroupId } from '../group-services/fn/group-member-controller/get-students-by-group-id';
+import { getAllStudents } from '../group-services/fn/student-controller/get-all-students';
+import { searchGroups } from '../group-services/fn/group-controller/search-groups';
+import { getPublishedPosts } from '../group-services/fn/group-post-controller/get-published-posts';
+import { createPost } from '../group-services/fn/group-post-controller/create-post';
+import { deletePost } from '../group-services/fn/group-post-controller/delete-post';
+import { addMember } from '../group-services/fn/group-member-controller/add-member';
+import { removeMember } from '../group-services/fn/group-member-controller/remove-member';
+import { designateCoAdmin } from '../group-services/fn/group-member-controller/designate-co-admin';
+import { archiveGroup } from '../group-services/fn/group-controller/archive-group';
+import { deleteGroup } from '../group-services/fn/group-controller/delete-group';
+import { uploadFile } from '../group-services/fn/group-post-controller/upload-file';
+import { downloadFile } from '../group-services/fn/group-post-controller/download-file';
+import { createGroup } from '../group-services/fn/group-controller/create-group';
+
 @Injectable({
   providedIn: 'root'
 })
 export class GroupApiService {
-  
+  private rootUrl: string;
+
   constructor(
-    private groupApi: Api,
     private http: HttpClient,
-    private keycloakService: KeycloakService
-  ) {}
-
-  // ========================================
-  // GROUP MANAGEMENT
-  // ========================================
-
-  /**
-   * Creates a new group with comprehensive validation
-   * @param groupData - Group creation data
-   * @returns Promise with created group information
-   */
-  async createGroup(groupData: CreateGroupRequest): Promise<GroupDto> {
-    try {
-      const result = await this.groupApi.invoke(createGroup, { body: groupData });
-      console.log('Group created successfully:', result);
-      return result;
-    } catch (error) {
-      console.error('Error creating group:', error);
-      throw new Error('Failed to create group. Please try again.');
-    }
+    private apiConfig: ApiConfiguration
+  ) {
+    this.rootUrl = this.apiConfig.rootUrl;
   }
 
   /**
-   * Retrieves all available groups with optional filtering
-   * @param includeArchived - Whether to include archived groups
-   * @returns Promise with array of groups
+   * Gets all groups for a user
+   * @param userId - User ID
+   * @returns Array of groups
    */
-  async getAllGroups(includeArchived: boolean = false): Promise<GroupDto[]> {
-    try {
-      const result = await this.groupApi.invoke(getAllGroups, {});
-      // Filter out archived groups if not requested
-      if (!includeArchived) {
-        return result.filter(group => !group.archived);
-      }
-      return result;
-    } catch (error) {
-      console.error('Error fetching groups:', error);
-      throw new Error('Failed to load groups. Please refresh the page.');
-    }
+  async getUserGroups(userId: string): Promise<GroupDto[]> {
+    const response = await firstValueFrom(
+      getGroupsByUserId(this.http, this.rootUrl, { userId })
+    );
+    const text = await (response.body as unknown as Blob).text();
+    return JSON.parse(text) as GroupDto[];
   }
 
   /**
-   * Gets detailed information about a specific group
-   * @param groupId - ID of the group to retrieve
-   * @returns Promise with group details
-   */
-  async getGroupDetails(groupId: number): Promise<GroupDto> {
-    try {
-      const result = await this.groupApi.invoke(getGroupById, { id: groupId });
-      return result;
-    } catch (error) {
-      console.error('Error fetching group details:', error);
-      throw new Error('Group not found or access denied.');
-    }
-  }
-
-  /**
-   * Updates group information
-   * @param groupId - ID of the group to update
-   * @param updateData - Updated group data
-   * @returns Promise with updated group
-   */
-  async updateGroup(groupId: number, updateData: Partial<GroupDto>): Promise<GroupDto> {
-    try {
-      const result = await this.groupApi.invoke(updateGroup, { 
-        id: groupId, 
-        body: updateData 
-      });
-      return result;
-    } catch (error) {
-      console.error('Error updating group:', error);
-      throw new Error('Failed to update group. Please check your permissions.');
-    }
-  }
-
-  /**
-   * Archives a group (soft delete)
-   * @param groupId - ID of the group to archive
-   * @returns Promise with operation result
-   */
-  async archiveGroup(groupId: number): Promise<void> {
-    try {
-      await this.groupApi.invoke(archiveGroup, { id: groupId });
-      console.log('Group archived successfully');
-    } catch (error) {
-      console.error('Error archiving group:', error);
-      throw new Error('Failed to archive group. You may not have sufficient permissions.');
-    }
-  }
-
-  /**
-   * Permanently deletes a group
-   * @param groupId - ID of the group to delete
-   * @returns Promise with operation result
-   */
-  async deleteGroup(groupId: number): Promise<void> {
-    try {
-      await this.groupApi.invoke(deleteGroup, { id: groupId });
-      console.log('Group deleted successfully');
-    } catch (error) {
-      console.error('Error deleting group:', error);
-      throw new Error('Failed to delete group. You may not have sufficient permissions.');
-    }
-  }
-
-  /**
-   * Searches groups by name, description, or subject
-   * @param searchTerm - Term to search for
-   * @returns Promise with matching groups
-   */
-  async searchGroups(searchTerm: string): Promise<GroupDto[]> {
-    try {
-      const result = await this.groupApi.invoke(searchGroups, { 
-        body: { keyword: searchTerm } 
-      });
-      return result;
-    } catch (error) {
-      console.error('Error searching groups:', error);
-      throw new Error('Search failed. Please try again.');
-    }
-  }
-
-  // ========================================
-  // MEMBER MANAGEMENT
-  // ========================================
-
-  /**
-   * Gets all members of a specific group
-   * @param groupId - ID of the group
-   * @returns Promise with array of group members
+   * Gets members of a group
+   * @param groupId - Group ID
+   * @returns Array of group members
    */
   async getGroupMembers(groupId: number): Promise<GroupMemberDto[]> {
-    try {
-      const result = await this.groupApi.invoke(getGroupMembers, { groupId });
-      return result;
-    } catch (error) {
-      console.error('Error fetching group members:', error);
-      throw new Error('Failed to load group members.');
-    }
+    const response = await firstValueFrom(
+      getGroupMembers(this.http, this.rootUrl, { groupId })
+    );
+    const text = await (response.body as unknown as Blob).text();
+    return JSON.parse(text) as GroupMemberDto[];
   }
 
   /**
-   * Adds a new member to the group
-   * @param groupId - ID of the group
-   * @param userId - ID of the user to add
-   * @returns Promise with operation result
+   * Creates a new group
+   * @param groupData - Group data
+   * @returns Created group
    */
-  async addMemberToGroup(groupId: number, userId: string): Promise<void> {
-    try {
-      await this.groupApi.invoke(addMember, { 
-        groupId, 
-        body: { userId } as AddMemberRequest 
-      });
-      console.log('Member added successfully');
-    } catch (error) {
-      console.error('Error adding member:', error);
-      throw new Error('Failed to add member. User may already be in the group.');
-    }
+  async createGroup(groupData: any): Promise<GroupDto> {
+    const response = await firstValueFrom(
+      createGroup(this.http, this.rootUrl, { body: groupData })
+    );
+    const text = await (response.body as unknown as Blob).text();
+    return JSON.parse(text) as GroupDto;
   }
 
   /**
-   * Removes a member from the group
-   * @param groupId - ID of the group
-   * @param userId - ID of the user to remove
-   * @returns Promise with operation result
+   * Gets available users that can be added to a group
+   * @param groupId - Group ID
+   * @returns Array of available users
    */
-  async removeMemberFromGroup(groupId: number, userId: string): Promise<void> {
-    try {
-      await this.groupApi.invoke(removeMember, { groupId, userId });
-      console.log('Member removed successfully');
-    } catch (error) {
-      console.error('Error removing member:', error);
-      throw new Error('Failed to remove member. You may not have sufficient permissions.');
-    }
+  async getAvailableUsersForGroup(groupId: number): Promise<UserResponse[]> {
+    const response = await firstValueFrom(
+      getStudentsByGroupId(this.http, this.rootUrl, { groupId })
+    );
+    const text = await (response.body as unknown as Blob).text();
+    return JSON.parse(text) as UserResponse[];
   }
 
   /**
-   * Leaves a group (for current user)
-   * @param groupId - ID of the group to leave
-   * @returns Promise with operation result
+   * Gets all students
+   * @returns Array of all students
    */
-  async leaveGroup(groupId: number): Promise<void> {
-    try {
-      const userId = this.keycloakService.userId;
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
-      
-      await this.groupApi.invoke(leaveGroup, { groupId, userId });
-      console.log('Left group successfully');
-    } catch (error) {
-      console.error('Error leaving group:', error);
-      throw new Error('Failed to leave group.');
-    }
+  async getAllStudents(): Promise<UserResponse[]> {
+    const response = await firstValueFrom(
+      getAllStudents(this.http, this.rootUrl)
+    );
+    const text = await (response.body as unknown as Blob).text();
+    return JSON.parse(text) as UserResponse[];
   }
 
   /**
-   * Designates a member as co-admin
-   * @param groupId - ID of the group
-   * @param userId - ID of the user to make co-admin
-   * @returns Promise with operation result
+   * Searches for groups by term
+   * @param term - Search term
+   * @returns Array of matching groups
    */
-  async makeCoAdmin(groupId: number, userId: string): Promise<void> {
-    try {
-      await this.groupApi.invoke(designateCoAdmin, { groupId, userId });
-      console.log('Co-admin designated successfully');
-    } catch (error) {
-      console.error('Error designating co-admin:', error);
-      throw new Error('Failed to designate co-admin.');
-    }
+  async searchGroups(term: string): Promise<GroupDto[]> {
+    const response = await firstValueFrom(
+      searchGroups(this.http, this.rootUrl, { body: { keyword: term } })
+    );
+    const text = await (response.body as unknown as Blob).text();
+    return JSON.parse(text) as GroupDto[];
   }
 
-  // ========================================
-  // POST MANAGEMENT
-  // ========================================
-
   /**
-   * Creates a new post in the group
-   * @param groupId - ID of the group
-   * @param postData - Post content and metadata
-   * @returns Promise with created post
+   * Gets posts for a group
+   * @param groupId - Group ID
+   * @returns Array of group posts
    */
-  async createPost(groupId: number, postData: { content: string; type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'DOCUMENT' | 'LINK' }): Promise<GroupPostDto> {
-    try {
-      const result = await this.groupApi.invoke(createPost, { 
-        groupId, 
-        body: postData 
-      });
-      return result;
-    } catch (error) {
-      console.error('Error creating post:', error);
-      throw new Error('Failed to create post.');
-    }
+  async getGroupPosts(groupId: number): Promise<GroupPostDto[]> {
+    const response = await firstValueFrom(
+      getPublishedPosts(this.http, this.rootUrl, { groupId })
+    );
+    const text = await (response.body as unknown as Blob).text();
+    return JSON.parse(text) as GroupPostDto[];
   }
 
   /**
-   * Gets all published posts in a group
-   * @param groupId - ID of the group
-   * @param page - Page number for pagination
-   * @param size - Number of posts per page
-   * @returns Promise with array of posts
+   * Creates a post in a group
+   * @param groupId - Group ID
+   * @param postData - Post data
+   * @returns Created post
    */
-  async getGroupPosts(groupId: number, page: number = 0, size: number = 20): Promise<GroupPostDto[]> {
-    try {
-      const result = await this.groupApi.invoke(getPublishedPosts, { 
-        groupId, 
-        page, 
-        size 
-      });
-      return result;
-    } catch (error) {
-      console.error('Error fetching group posts:', error);
-      throw new Error('Failed to load group posts.');
-    }
+  async createPost(groupId: number, postData: any): Promise<GroupPostDto> {
+    const response = await firstValueFrom(
+      createPost(this.http, this.rootUrl, { groupId, body: postData })
+    );
+    const text = await (response.body as unknown as Blob).text();
+    return JSON.parse(text) as GroupPostDto;
   }
 
   /**
-   * Deletes a post
-   * @param groupId - ID of the group
-   * @param postId - ID of the post to delete
-   * @returns Promise with operation result
+   * Deletes a post from a group
+   * @param groupId - Group ID
+   * @param postId - Post ID
    */
   async deletePost(groupId: number, postId: number): Promise<void> {
-    try {
-      await this.groupApi.invoke(deletePost, { groupId, postId });
-      console.log('Post deleted successfully');
-    } catch (error) {
-      console.error('Error deleting post:', error);
-      throw new Error('Failed to delete post. You may not have sufficient permissions.');
-    }
+    await firstValueFrom(
+      deletePost(this.http, this.rootUrl, { groupId, postId })
+    );
   }
 
-  // ========================================
-  // FILE MANAGEMENT
-  // ========================================
+  /**
+   * Adds a member to a group
+   * @param groupId - Group ID
+   * @param userId - User ID
+   */
+  async addMemberToGroup(groupId: number, userId: string): Promise<void> {
+    await firstValueFrom(
+      addMember(this.http, this.rootUrl, { groupId, body: { userId } })
+    );
+  }
 
   /**
-   * Uploads a file to the group
-   * @param groupId - ID of the group
-   * @param file - File to upload
-   * @param content - Optional content for the post
-   * @returns Promise with upload result
+   * Removes a member from a group
+   * @param groupId - Group ID
+   * @param userId - User ID
    */
-  async uploadFile(groupId: number, file: File, content?: string): Promise<any> {
-    try {
-      const uploadRequest = {
-        content: content || '',
-        fileName: file.name
-      };
-      
-      const result = await this.groupApi.invoke(uploadFile, { 
+  async removeMemberFromGroup(groupId: number, userId: string): Promise<void> {
+    await firstValueFrom(
+      removeMember(this.http, this.rootUrl, { groupId, userId })
+    );
+  }
+
+  /**
+   * Makes a user co-admin of a group
+   * @param groupId - Group ID
+   * @param userId - User ID
+   */
+  async makeCoAdmin(groupId: number, userId: string): Promise<void> {
+    await firstValueFrom(
+      designateCoAdmin(this.http, this.rootUrl, { groupId, userId })
+    );
+  }
+
+  /**
+   * Archives a group
+   * @param groupId - Group ID
+   */
+  async archiveGroup(groupId: number): Promise<void> {
+    await firstValueFrom(
+      archiveGroup(this.http, this.rootUrl, { id: groupId })
+    );
+  }
+
+  /**
+   * Deletes a group
+   * @param groupId - Group ID
+   */
+  async deleteGroup(groupId: number): Promise<void> {
+    await firstValueFrom(
+      deleteGroup(this.http, this.rootUrl, { id: groupId })
+    );
+  }
+
+  /**
+   * Uploads a file to a group
+   * @param groupId - Group ID
+   * @param file - File to upload
+   * @returns Upload result
+   */
+  async uploadFile(groupId: number, file: File): Promise<any> {
+    const response = await firstValueFrom(
+      uploadFile(this.http, this.rootUrl, { 
         groupId, 
-        request: uploadRequest,
-        body: { file: file }
-      });
-      return result;
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      throw new Error('Failed to upload file. Please check file size and format.');
-    }
+        request: { fileName: file.name },
+        body: { file } 
+      })
+    );
+    const text = await (response.body as unknown as Blob).text();
+    return JSON.parse(text);
   }
 
   /**
    * Downloads a file from a group post
-   * @param groupId - ID of the group
-   * @param postId - ID of the post containing the file
-   * @returns Promise with file data
+   * @param groupId - Group ID
+   * @param postId - Post ID
+   * @returns File blob
    */
   async downloadFile(groupId: number, postId: number): Promise<Blob> {
-    try {
-      const result = await this.groupApi.invoke$Response(downloadFile, { 
-        groupId, 
-        postId 
-      });
-      return result.body;
-    } catch (error) {
-      console.error('Error downloading file:', error);
-      throw new Error('Failed to download file.');
-    }
-  }
-
-  // ========================================
-  // STATISTICS & ANALYTICS
-  // ========================================
-
-  /**
-   * Gets group statistics
-   * @param groupId - ID of the group
-   * @returns Promise with group statistics
-   */
-  async getGroupStatistics(groupId: number): Promise<GroupStatisticsDto> {
-    try {
-      const result = await this.groupApi.invoke(getGroupStatistics, { groupId });
-      return result;
-    } catch (error) {
-      console.error('Error fetching group statistics:', error);
-      throw new Error('Failed to load group statistics.');
-    }
-  }
-
-  // ========================================
-  // USER-SPECIFIC OPERATIONS
-  // ========================================
-
-  /**
-   * Gets groups for a specific user
-   * @param userId - ID of the user
-   * @returns Promise with user's groups
-   */
-  async getUserGroups(userId: string): Promise<GroupDto[]> {
-    try {
-      const result = await this.groupApi.invoke(getGroupsByUserId, { userId });
-      return result;
-    } catch (error) {
-      console.error('Error fetching user groups:', error);
-      throw new Error('Failed to load user groups.');
-    }
+    const response = await firstValueFrom(
+      downloadFile(this.http, this.rootUrl, { groupId, postId })
+    );
+    return response.body;
   }
 
   /**
-   * Gets all students (for admin/teacher use)
-   * @returns Promise with array of students
+   * Gets all users (for admin purposes)
+   * @returns Array of all users
    */
-  async getAllStudents(): Promise<any[]> {
-    try {
-      const result = await this.groupApi.invoke(getAllStudents, {});
-      return result;
-    } catch (error) {
-      console.error('Error fetching students:', error);
-      throw new Error('Failed to load students.');
-    }
+  async getAllUsers(): Promise<UserResponse[]> {
+    // This is a placeholder implementation
+    // In a real app, you would call the appropriate API endpoint
+    return this.getAllStudents();
   }
 }
