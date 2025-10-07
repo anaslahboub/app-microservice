@@ -1,5 +1,6 @@
 package com.anas.chatservice.notification;
 
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -86,5 +87,13 @@ public class NotificationService {
             notification.setRead(true);
             notificationRepository.save(notification);
         });
+    }
+
+    public void  deleteNotification(Long notificationId){
+        if(!notificationRepository.existsById(notificationId)){
+
+            throw new NotFoundException("Notification not found");
+        }
+        notificationRepository.deleteById(notificationId);
     }
 }

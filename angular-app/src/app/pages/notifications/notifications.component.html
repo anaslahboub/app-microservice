@@ -27,25 +27,25 @@
         @for (notification of notifications; track notification.id) {
           <div 
             class="notification-item" 
-            [class.unread]="!notification.isRead"
-            [ngClass]="getNotificationClass(notification.type)">
+            [class.unread]="!notification.read"
+            [ngClass]="getNotificationClass(notification)">
             
             <div class="notification-icon">
-              <i [class]="getNotificationIcon(notification.type)"></i>
+              <i [class]="getNotificationIcon(notification)"></i>
             </div>
             
             <div class="notification-content">
               <div class="notification-header">
-                <h4 class="notification-title">{{ notification.title }}</h4>
+                <h4 class="notification-title">{{ getNotificationTitle(notification) }}</h4>
                 <span class="notification-time">
                   {{ notification.timestamp | date:'short' }}
                 </span>
               </div>
               
-              <p class="notification-message">{{ notification.message }}</p>
+              <p class="notification-message">{{ getNotificationMessage(notification) }}</p>
               
               <div class="notification-actions">
-                @if (!notification.isRead) {
+                @if (!notification.read) {
                   <button 
                     class="btn btn-sm btn-outline-primary"
                     (click)="markAsRead(notification.id)">
@@ -63,7 +63,7 @@
               </div>
             </div>
             
-            @if (!notification.isRead) {
+            @if (!notification.read) {
               <div class="notification-status">
                 <div class="unread-indicator"></div>
               </div>

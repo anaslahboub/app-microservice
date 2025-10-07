@@ -4,6 +4,7 @@ import com.anas.groupservice.dto.NotificationDTO;
 import com.anas.groupservice.entity.Notification;
 import com.anas.groupservice.mapper.NotificationMapper;
 import com.anas.groupservice.repository.NotificationRepository;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -123,4 +124,13 @@ public class NotificationService {
         log.info("Sending broadcast notification: {}", notification);
         messagingTemplate.convertAndSend("/topic/notifications", notification);
     }
+
+
+    @Transactional
+    public void deleteNotification(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new NotFoundException("Notification not found"));
+        notificationRepository.delete(notification);
+    }
+
 }

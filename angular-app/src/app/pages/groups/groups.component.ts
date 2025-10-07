@@ -10,6 +10,8 @@ import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 
 import * as Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
+import { Api } from '../../chat-services/api';
+import { getAllUsers } from '../../chat-services/functions';
 
 /**
  * Main Groups Component - Advanced Group Management System
@@ -77,6 +79,7 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
   uploadProgress = 0;
   
   /** Available users for adding to groups */
+  availableGroups: GroupMemberDto[] = [];
   availableUsers: UserResponse[] = [];
   showAddMemberModal = false;
   selectedUsersToAdd: Set<string> = new Set();
@@ -88,7 +91,8 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
   
   constructor(
     public keycloakService: KeycloakService,
-    private groupApiService: GroupApiService
+    private groupApiService: GroupApiService,
+    private chatApiService: Api
   ) {}
   
   ngOnInit(): void {
@@ -647,6 +651,26 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   /**
+   * Updates a group's information
+   * @param group - Group data to update
+   * @returns Updated group
+   */
+  async updateGroup(group: GroupDto): Promise<void> {
+    if (!group || !group.id) {
+      this.showError('Invalid group data');
+      return;
+    }
+
+    try {
+      const updatedGroup = await this.groupApiService.updateGroup(group);
+      console.log('Group updated successfully',updatedGroup);
+    } catch (error) {
+      console.error('Error updating group:', error);
+      this.showError('Failed to update group');
+    }
+  }
+
+  /**
    * Makes a member co-admin
    * @param groupId - ID of the group
    * @param userId - ID of the user to make co-admin
@@ -684,33 +708,39 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.showError('Failed to remove member');
     }
   }
+/**
+ * Loads all available users that can be added to a group
+ */
+async loadAvailableUsers(): Promise<void> {
+  this.isLoadingAvailableUsers = true;
 
-  /**
-   * Loads all available users that can be added to a group
-   */
-  async loadAvailableUsers(): Promise<void> {
-    this.isLoadingAvailableUsers = true;
-    try {
-      /*if (!this.selectedGroup || !this.selectedGroup.id) {
-        this.availableUsers = [];
-        return;
-      }*/
-      
-      this.availableUsers = await this.groupApiService.getAvailableUsersForGroup(this.selectedGroup.id);
-      
-      // Filter out the current user to prevent self-add
-      this.availableUsers = this.availableUsers.filter(user => 
-        user.id && user.id !== this.keycloakService.userId
-      );
-      console.log("availible users")
-    } catch (error) {
-      console.error('Error loading available users:', error);
-      this.showError('Failed to load available users');
+  try {
+    if (!this.selectedGroup || !this.selectedGroup.id) {
       this.availableUsers = [];
-    } finally {
-      this.isLoadingAvailableUsers = false;
+      return;
     }
+
+    this.availableGroups = await this.groupApiService.getGroupMembers(this.selectedGroup.id);
+
+    this.availableUsers = await this.chatApiService.invoke(getAllUsers, {});
+
+    const memberIds = new Set(
+      [...(this.availableGroups || []), ...(this.groupMembers || [])].map(m => m.userId)
+    );
+
+    this.availableUsers = this.availableUsers.filter(user => !memberIds.has(user.id));
+
+    console.log("✅ Available users:", this.availableUsers);
+
+  } catch (error) {
+    console.error('❌ Error loading available users:', error);
+    this.showError('Failed to load available users');
+    this.availableUsers = [];
+  } finally {
+    this.isLoadingAvailableUsers = false;
   }
+}
+
 
   /**
    * Opens the add member modal

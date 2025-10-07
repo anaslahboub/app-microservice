@@ -80,29 +80,23 @@ public class GroupMemberService {
                 .collect(Collectors.toList());
     }
 
-    public List<GroupMemberDTO> getAllStudents() {
-        return groupMemberRepository.findAllStudents().stream()
-                .map(groupMemberMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
     public void removeMember(Long groupId, String userId, String requesterId) {
-        // Check if requester is admin or co-admin
         if (!isUserAdminOrCoAdmin(groupId, requesterId)) {
             throw new SecurityException("Only admin or co-admin can remove members");
         }
 
-        // Prevent admin from removing themselves
+        // Empêcher l'admin de se supprimer lui-même
         if (requesterId.equals(userId) && isUserAdmin(groupId, userId)) {
             throw new IllegalArgumentException("Admin cannot remove themselves");
         }
 
+        // Chercher le membre dans la base
         groupMemberRepository.findByGroupIdAndUserId(groupId, userId)
                 .ifPresent(groupMember -> {
-                    groupMember.setStatus("LEFT");
-                    GroupMember savedMember = groupMemberRepository.save(groupMember);
-                    
-                    // Send notification
+                    // Supprimer le membre de la base
+                    groupMemberRepository.delete(groupMember);
+
+                    // Envoyer la notification
                     Group group = groupRepository.findById(groupId).orElse(null);
                     if (group != null) {
                         NotificationDTO notification = new NotificationDTO();
@@ -113,7 +107,7 @@ public class GroupMemberService {
                         notification.setUserId(userId);
                         notification.setTimestamp(LocalDateTime.now().toString());
                         notification.setRead(false);
-                        
+
                         notificationService.createAndSendUserNotification(userId, notification);
                     }
                 });

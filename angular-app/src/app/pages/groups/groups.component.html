@@ -458,22 +458,22 @@
             <h4>Group Information</h4>
             <div class="setting-item">
               <label>Group Name</label>
-              <input type="text" [value]="selectedGroup.name" class="setting-input">
+              <input type="text" [(ngModel)]="selectedGroup.name" class="setting-input">
             </div>
             <div class="setting-item">
               <label>Description</label>
-              <textarea [value]="selectedGroup.description" class="setting-textarea"></textarea>
+              <textarea [(ngModel)]="selectedGroup.description" class="setting-textarea"></textarea>
             </div>
             <div class="setting-item">
               <label>Subject</label>
-              <input type="text" [value]="selectedGroup.subject" class="setting-input">
+              <input type="text" [(ngModel)]="selectedGroup.subject" class="setting-input">
             </div>
           </div>
           
           <div class="setting-section">
             <h4>Actions</h4>
             <div class="setting-actions">
-              <button class="setting-btn primary">
+              <button class="setting-btn primary" (click)="updateGroup(selectedGroup!)">
                 <i class="fas fa-save"></i>
                 Save Changes
               </button>

@@ -11,6 +11,8 @@ export type { GetUnreadUserNotifications$Params } from './fn/notification-contro
 export { getUnreadUserNotifications } from './fn/notification-controller/get-unread-user-notifications';
 export type { GetUnreadNotificationCount$Params } from './fn/notification-controller/get-unread-notification-count';
 export { getUnreadNotificationCount } from './fn/notification-controller/get-unread-notification-count';
+export type { DeleteNotification$Params } from './fn/notification-controller/delete-notification';
+export { deleteNotification } from './fn/notification-controller/delete-notification';
 export type { SaveMessage$Params } from './fn/message/save-message';
 export { saveMessage } from './fn/message/save-message';
 export type { SetMessageToSeen$Params } from './fn/message/set-message-to-seen';

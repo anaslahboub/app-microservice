@@ -11,6 +11,8 @@ export type { GetUnreadUserNotifications$Params } from './fn/notification-contro
 export { getUnreadUserNotifications } from './fn/notification-controller/get-unread-user-notifications';
 export type { GetUnreadNotificationCount$Params } from './fn/notification-controller/get-unread-notification-count';
 export { getUnreadNotificationCount } from './fn/notification-controller/get-unread-notification-count';
+export type { DeleteNotification$Params } from './fn/notification-controller/delete-notification';
+export { deleteNotification } from './fn/notification-controller/delete-notification';
 export type { GetGroupById$Params } from './fn/group-controller/get-group-by-id';
 export { getGroupById } from './fn/group-controller/get-group-by-id';
 export type { UpdateGroup$Params } from './fn/group-controller/update-group';
@@ -53,8 +55,6 @@ export type { GetStudentsByGroupId$Params } from './fn/group-member-controller/g
 export { getStudentsByGroupId } from './fn/group-member-controller/get-students-by-group-id';
 export type { RemoveMember$Params } from './fn/group-member-controller/remove-member';
 export { removeMember } from './fn/group-member-controller/remove-member';
-export type { GetAllStudents$Params } from './fn/student-controller/get-all-students';
-export { getAllStudents } from './fn/student-controller/get-all-students';
 export type { GetGroupStatistics$Params } from './fn/statistics-controller/get-group-statistics';
 export { getGroupStatistics } from './fn/statistics-controller/get-group-statistics';
 export type { GetGroupStatisticsForTeacher$Params } from './fn/statistics-controller/get-group-statistics-for-teacher';

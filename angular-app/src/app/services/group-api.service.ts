@@ -22,6 +22,7 @@ import { deleteGroup } from '../group-services/fn/group-controller/delete-group'
 import { uploadFile } from '../group-services/fn/group-post-controller/upload-file';
 import { downloadFile } from '../group-services/fn/group-post-controller/download-file';
 import { createGroup } from '../group-services/fn/group-controller/create-group';
+import { updateGroup } from '../group-services/fn/group-controller/update-group';
 
 @Injectable({
   providedIn: 'root'
@@ -81,11 +82,9 @@ export class GroupApiService {
    * @returns Array of available users
    */
   async getAvailableUsersForGroup(groupId: number): Promise<UserResponse[]> {
-    const response = await firstValueFrom(
-      getStudentsByGroupId(this.http, this.rootUrl, { groupId })
-    );
-    const text = await (response.body as unknown as Blob).text();
-    return JSON.parse(text) as UserResponse[];
+    // This method should return users who are NOT yet members of the group
+    // For now, we're returning all students, and the component will filter out existing members
+    return this.getAllStudents();
   }
 
   /**
@@ -205,6 +204,22 @@ export class GroupApiService {
   }
 
   /**
+   * Updates a group's information
+   * @param group - Group data to update
+   * @returns Updated group
+   */
+  async updateGroup(group: GroupDto): Promise<GroupDto> {
+    const response = await firstValueFrom(
+      updateGroup(this.http, this.rootUrl, { 
+        id: group.id!, 
+        body: group 
+      })
+    );
+    const text = await (response.body as unknown as Blob).text();
+    return JSON.parse(text) as GroupDto;
+  }
+
+  /**
    * Uploads a file to a group
    * @param groupId - Group ID
    * @param file - File to upload
@@ -244,4 +259,9 @@ export class GroupApiService {
     // In a real app, you would call the appropriate API endpoint
     return this.getAllStudents();
   }
+
+
+
+
+  
 }

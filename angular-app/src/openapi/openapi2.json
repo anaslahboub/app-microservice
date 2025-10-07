@@ -532,29 +532,6 @@
         }
       }
     },
-    "/api/students": {
-      "get": {
-        "tags": [
-          "student-controller"
-        ],
-        "operationId": "getAllStudents",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GroupMemberDTO"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/statistics/groups": {
       "get": {
         "tags": [
@@ -841,6 +818,30 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/notifications/{notificationId}": {
+      "delete": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "deleteNotification",
+        "parameters": [
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
