@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "api-gen": "ng-openapi-gen --input=./src/openapi/openapi2.json --output=./src/app/group-services "
+    "api-gen": "ng-openapi-gen --input=./src/openapi/openapi3.json --output=./src/app/post-services "
   },
   "prettier": {
     "printWidth": 100,

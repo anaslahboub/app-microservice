@@ -1,0 +1,150 @@
+<div class="sticky-top bg-white">
+  <div class="d-flex justify-content-between align-items-center gap-2 p-2">
+    <h4>Posts</h4>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-primary" (click)="loadPosts()">My Posts</button>
+      <button class="btn btn-sm btn-outline-secondary" (click)="loadTrendingPosts()">Trending</button>
+      <button class="btn btn-sm btn-outline-success" (click)="loadBookmarkedPosts()">Bookmarks</button>
+    </div>
+  </div>
+  <div class="d-flex flex-column gap-1 p-2">
+    <div class="input-group">
+      <span class="input-group-text">
+        <i class="fas fa-search"></i>
+      </span>
+      <input type="text" class="form-control-sm" placeholder="Search posts" [(ngModel)]="searchTerm" (keyup.enter)="searchPosts()" aria-label="Search">
+      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="searchPosts()">Search</button>
+    </div>
+    <div class="d-flex gap-2 mt-2">
+      <span class="badge rounded-pill text-bg-light cursor-pointer">All</span>
+      <span class="badge rounded-pill text-bg-light cursor-pointer">Text</span>
+      <span class="badge rounded-pill text-bg-light cursor-pointer">Images</span>
+    </div>
+  </div>
+</div>
+
+<div class="post-list mt-3">
+  <!-- Loading indicator -->
+  <div *ngIf="isLoadingPosts" class="text-center p-3">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Post creation form -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <textarea 
+        class="form-control mb-2" 
+        rows="3" 
+        placeholder="What's on your mind?" 
+        [(ngModel)]="newPostContent">
+      </textarea>
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <!-- Hidden file input -->
+          <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;" />
+          <button class="btn btn-light btn-sm me-1" (click)="fileInput.click()">
+            <i class="fas fa-image"></i>
+          </button>
+          <button class="btn btn-light btn-sm">
+            <i class="fas fa-paperclip"></i>
+          </button>
+        </div>
+        <button 
+          class="btn btn-primary btn-sm" 
+          (click)="sendPost()" 
+          [disabled]="isSendingPost || (!newPostContent.trim() && !selectedFile)">
+          <span *ngIf="isSendingPost" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          Post
+        </button>
+      </div>
+      <!-- Preview of selected image -->
+      <div *ngIf="selectedFilePreview" class="mt-2">
+        <div class="d-flex align-items-center bg-light p-2 rounded">
+          <img [src]="selectedFilePreview" alt="Selected image" class="img-thumbnail me-2" style="max-height: 50px; max-width: 50px;">
+          <span class="text-truncate flex-grow-1">{{ selectedFileName }}</span>
+          <button class="btn btn-sm btn-outline-danger" (click)="removeSelectedFile()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Posts list -->
+  <div *ngIf="!isLoadingPosts && posts.length > 0">
+    <div *ngFor="let post of posts; trackBy: trackById" class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div class="d-flex align-items-center">
+            <div class="user-img me-2">
+              <img src="user.png" alt="User" class="rounded-circle" width="40" height="40">
+            </div>
+            <div>
+              <h6 class="mb-0">{{ post.authorId || 'Unknown User' }}</h6>
+              <small class="text-muted">{{ formatDate(post.createdDate) }}</small>
+            </div>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-ellipsis-h"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" (click)="deletePost(post.id!)"><i class="fas fa-trash me-2"></i>Delete</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="mt-3">
+          <p class="card-text">{{ post.content }}</p>
+          <div *ngIf="post.imageUrl" class="text-center">
+            <img [src]="post.imageUrl" alt="Post image" class="img-fluid rounded">
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-between mt-3">
+          <div class="d-flex gap-3">
+            <button class="btn btn-light btn-sm d-flex align-items-center" (click)="toggleLike(post.id!)">
+              <i class="fas fa-heart me-1" [class.text-danger]="post.likes && post.likes.length > 0"></i>
+              <span>{{ post.likeCount || 0 }}</span>
+            </button>
+            <button class="btn btn-light btn-sm d-flex align-items-center">
+              <i class="fas fa-comment me-1"></i>
+              <span>{{ post.commentCount || 0 }}</span>
+            </button>
+            <button class="btn btn-light btn-sm d-flex align-items-center" (click)="toggleBookmark(post.id!)">
+              <i class="fas fa-bookmark me-1" [class.text-primary]="post.bookmarks && post.bookmarks.length > 0"></i>
+              <span>{{ post.bookmarkCount || 0 }}</span>
+            </button>
+          </div>
+          <button class="btn btn-light btn-sm">
+            <i class="fas fa-share-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pagination -->
+    <nav aria-label="Posts pagination" class="d-flex justify-content-center">
+      <ul class="pagination">
+        <li class="page-item" [class.disabled]="currentPage === 0">
+          <a class="page-link" (click)="goToPage(currentPage - 1)">Previous</a>
+        </li>
+        <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index" [class.active]="i === currentPage">
+          <a class="page-link" (click)="goToPage(i)">{{ i + 1 }}</a>
+        </li>
+        <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+          <a class="page-link" (click)="goToPage(currentPage + 1)">Next</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- No posts message -->
+  <div *ngIf="!isLoadingPosts && posts.length === 0" class="text-center p-5">
+    <i class="fas fa-newspaper fa-3x mb-3 text-muted"></i>
+    <h5>No posts found</h5>
+    <p class="text-muted">Be the first to share something!</p>
+  </div>
+</div>

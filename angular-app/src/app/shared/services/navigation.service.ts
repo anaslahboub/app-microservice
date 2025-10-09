@@ -26,6 +26,12 @@ export class NavigationService {
       isOpen: false
     },
     {
+      icon: 'fas fa-newspaper',
+      label: 'Posts',
+      route: '/posts',
+      isOpen: false
+    },
+    {
       icon: 'fas fa-bell',
       label: 'Notifications',
       route: '/notifications',

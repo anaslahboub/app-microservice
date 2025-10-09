@@ -1,6 +1,8 @@
 package com.anas.postservice.controller;
 
 
+import com.anas.postservice.dto.CreatePostRequest;
+import com.anas.postservice.dto.PostResponse;
 import com.anas.postservice.entities.Comment;
 import com.anas.postservice.entities.Like;
 import com.anas.postservice.entities.Post;
@@ -8,14 +10,19 @@ import com.anas.postservice.entities.Vote;
 import com.anas.postservice.entities.Bookmark;
 import com.anas.postservice.enumeration.PostStatus;
 import com.anas.postservice.service.PostService;
+import com.anas.postservice.dto.PostRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,17 +34,38 @@ public class PostController {
 
     private final PostService postService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Post> createPost(
-            @RequestParam("content") String content,
-            @RequestParam(value = "image-url", required = false) String imageUrl,
-            @RequestParam("group-id") String groupId,
+            @Valid @ModelAttribute CreatePostRequest postRequest, // Changed to @ModelAttribute
             Authentication authentication) {
 
         String userId = authentication.getName();
-        Post post = postService.createPost(content, imageUrl, groupId, userId);
+        Post post = postService.createPost(postRequest, userId);
         return ResponseEntity.ok(post);
     }
+
+    @GetMapping
+    public ResponseEntity<List<Post>> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        List<Post> postResponses = postService.getAllPosts(pageable);
+        return ResponseEntity.ok(postResponses);
+    }
+
+    @GetMapping("/my-posts")
+    public ResponseEntity<List<Post>> getMyPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication authentication) {
+
+        String userId = authentication.getName();
+        Pageable pageable = PageRequest.of(page, size);
+        List<Post> posts = postService.getPostsByAuthorId(userId, pageable);
+        return ResponseEntity.ok(posts);
+    }
+
 
     @GetMapping("/group/{group-id}")
     public ResponseEntity<Page<Post>> getPostsByGroupId(
@@ -66,6 +94,20 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
+    @GetMapping("/my-pending")
+    public ResponseEntity<Page<Post>> getMyPendingPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication authentication) {
+
+        String userId = authentication.getName();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> posts = postService.getPendingPostsByAuthorId(userId, pageable);
+        return ResponseEntity.ok(posts);
+    }
+
+
+
     @PatchMapping("/{post-id}/status")
     public ResponseEntity<Post> updatePostStatus(
             @PathVariable("post-id") Long postId,
@@ -87,6 +129,12 @@ public class PostController {
     @DeleteMapping("/{post-id}")
     public ResponseEntity<Void> deletePost(@PathVariable("post-id") Long postId) {
         postService.deletePost(postId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deletePosts(@RequestParam List<Long> postIds) {
+        postService.deletePosts(postIds);
         return ResponseEntity.noContent().build();
     }
 
@@ -161,6 +209,29 @@ public class PostController {
         String userId = authentication.getName();
         Pageable pageable = PageRequest.of(page, size);
         Page<Post> posts = postService.getBookmarkedPostsByUser(userId, pageable);
+        return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<Post>> searchPosts(
+            @RequestParam("query") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> posts = postService.searchApprovedPosts(query, pageable);
+        return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/group/{group-id}/search")
+    public ResponseEntity<Page<Post>> searchPostsInGroup(
+            @PathVariable("group-id") String groupId,
+            @RequestParam("query") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> posts = postService.searchApprovedPostsInGroup(groupId, query, pageable);
         return ResponseEntity.ok(posts);
     }
 

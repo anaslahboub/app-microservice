@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 import static jakarta.persistence.GenerationType.SEQUENCE;
@@ -18,7 +20,10 @@ import static jakarta.persistence.GenerationType.SEQUENCE;
 @NoArgsConstructor
 @Entity
 @Table(name = "posts")
-public class Post extends BaseAuditingEntity {
+public class Post extends BaseAuditingEntity implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    
     @Id
     @SequenceGenerator(name = "post_id_seq", sequenceName = "post_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = SEQUENCE, generator = "post_id_seq")
@@ -74,5 +79,13 @@ public class Post extends BaseAuditingEntity {
     @Transient
     public boolean isPending() {
         return PostStatus.PENDING.equals(this.status);
+    }
+    
+    @Transient
+    public String getSummary() {
+        if (this.content == null) {
+            return "";
+        }
+        return this.content.length() > 100 ? this.content.substring(0, 100) + "..." : this.content;
     }
 }

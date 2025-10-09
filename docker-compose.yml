@@ -77,8 +77,20 @@ services:
 #    volumes:
 #      - ./chat-service:/app
 
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: [ "redis-server", "--appendonly", "yes" ]
+    volumes:
+      - redis_data:/data
+
+
 volumes:
   postgres_data:
   pgadmin_data:
   # Named volume for Keycloak data persistence
   keycloak_data:
+  redis_data:

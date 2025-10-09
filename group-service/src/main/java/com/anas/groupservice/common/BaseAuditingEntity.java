@@ -11,13 +11,14 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class   BaseAuditingEntity {
+public abstract class   BaseAuditingEntity implements Serializable {
 
     @CreatedBy
     @Column(name = "created_by", updatable = false)
