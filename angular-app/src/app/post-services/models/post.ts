@@ -4,7 +4,6 @@
 import { Bookmark } from '../models/bookmark';
 import { Comment } from '../models/comment';
 import { Like } from '../models/like';
-import { Vote } from '../models/vote';
 export interface Post {
   approved?: boolean;
   authorId?: string;
@@ -14,8 +13,6 @@ export interface Post {
   comments?: Array<Comment>;
   content?: string;
   createdDate?: string;
-  downvoteCount?: number;
-  groupId?: string;
   id?: number;
   imageUrl?: string;
   lastModifiedDate?: string;
@@ -26,6 +23,4 @@ export interface Post {
   rejected?: boolean;
   status?: 'PENDING' | 'APPROVED' | 'REJECTED';
   summary?: string;
-  upvoteCount?: number;
-  votes?: Array<Vote>;
 }

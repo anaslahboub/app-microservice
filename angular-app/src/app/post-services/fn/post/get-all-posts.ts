@@ -9,18 +9,14 @@ import { RequestBuilder } from '../../request-builder';
 
 import { PagedModelPost } from '../../models/paged-model-post';
 
-export interface SearchPostsInGroup$Params {
-  'group-id': string;
-  query: string;
+export interface GetAllPosts$Params {
   page?: number;
   size?: number;
 }
 
-export function searchPostsInGroup(http: HttpClient, rootUrl: string, params: SearchPostsInGroup$Params, context?: HttpContext): Observable<StrictHttpResponse<PagedModelPost>> {
-  const rb = new RequestBuilder(rootUrl, searchPostsInGroup.PATH, 'get');
+export function getAllPosts(http: HttpClient, rootUrl: string, params?: GetAllPosts$Params, context?: HttpContext): Observable<StrictHttpResponse<PagedModelPost>> {
+  const rb = new RequestBuilder(rootUrl, getAllPosts.PATH, 'get');
   if (params) {
-    rb.path('group-id', params['group-id'], {});
-    rb.query('query', params.query, {});
     rb.query('page', params.page, {});
     rb.query('size', params.size, {});
   }
@@ -35,4 +31,4 @@ export function searchPostsInGroup(http: HttpClient, rootUrl: string, params: Se
   );
 }
 
-searchPostsInGroup.PATH = '/api/v1/posts/group/{group-id}/search';
+getAllPosts.PATH = '/api/v1/posts';

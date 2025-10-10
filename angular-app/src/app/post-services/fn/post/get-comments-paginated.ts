@@ -7,18 +7,18 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { PagedModelComment } from '../../models/paged-model-comment';
+import { PagedModelCommentResponse } from '../../models/paged-model-comment-response';
 
-export interface GetComments$Params {
-  'post-id': number;
+export interface GetCommentsPaginated$Params {
+  postId: number;
   page?: number;
   size?: number;
 }
 
-export function getComments(http: HttpClient, rootUrl: string, params: GetComments$Params, context?: HttpContext): Observable<StrictHttpResponse<PagedModelComment>> {
-  const rb = new RequestBuilder(rootUrl, getComments.PATH, 'get');
+export function getCommentsPaginated(http: HttpClient, rootUrl: string, params: GetCommentsPaginated$Params, context?: HttpContext): Observable<StrictHttpResponse<PagedModelCommentResponse>> {
+  const rb = new RequestBuilder(rootUrl, getCommentsPaginated.PATH, 'get');
   if (params) {
-    rb.path('post-id', params['post-id'], {});
+    rb.path('postId', params.postId, {});
     rb.query('page', params.page, {});
     rb.query('size', params.size, {});
   }
@@ -28,9 +28,9 @@ export function getComments(http: HttpClient, rootUrl: string, params: GetCommen
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<PagedModelComment>;
+      return r as StrictHttpResponse<PagedModelCommentResponse>;
     })
   );
 }
 
-getComments.PATH = '/api/v1/posts/{post-id}/comments';
+getCommentsPaginated.PATH = '/api/v1/posts/{postId}/comments/paginated';

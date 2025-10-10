@@ -7,18 +7,15 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { Vote } from '../../models/vote';
 
-export interface VotePost$Params {
-  'post-id': number;
-  upvote: boolean;
+export interface GetDebugInfo$Params {
 }
 
-export function votePost(http: HttpClient, rootUrl: string, params: VotePost$Params, context?: HttpContext): Observable<StrictHttpResponse<Vote>> {
-  const rb = new RequestBuilder(rootUrl, votePost.PATH, 'post');
+export function getDebugInfo(http: HttpClient, rootUrl: string, params?: GetDebugInfo$Params, context?: HttpContext): Observable<StrictHttpResponse<{
+[key: string]: any;
+}>> {
+  const rb = new RequestBuilder(rootUrl, getDebugInfo.PATH, 'get');
   if (params) {
-    rb.path('post-id', params['post-id'], {});
-    rb.query('upvote', params.upvote, {});
   }
 
   return http.request(
@@ -26,9 +23,11 @@ export function votePost(http: HttpClient, rootUrl: string, params: VotePost$Par
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Vote>;
+      return r as StrictHttpResponse<{
+      [key: string]: any;
+      }>;
     })
   );
 }
 
-votePost.PATH = '/api/v1/posts/{post-id}/vote';
+getDebugInfo.PATH = '/api/v1/files/debug/info';

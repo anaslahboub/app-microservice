@@ -48,26 +48,30 @@ public class FileService {
             }
         }
         final String fileExtension = getFileExtension(sourceFile.getOriginalFilename());
-        String targetFilePath = finalUploadPath + separator + currentTimeMillis() + "." + fileExtension;
+        String fileName = currentTimeMillis() + "." + fileExtension;
+        String targetFilePath = finalUploadPath + separator + fileName;
         Path targetPath = Paths.get(targetFilePath);
         try {
             Files.write(targetPath, sourceFile.getBytes());
             log.info("File saved to: " + targetFilePath);
-            return targetFilePath;
+            // Return relative path for web access, using forward slashes for URLs
+            String webPath = "/post-uploads/" + fileUploadSubPath.replace(separator, "/") + "/" + fileName;
+            log.info("File accessible at: " + webPath);
+            return webPath;
         } catch (IOException e) {
             log.error("File was not saved", e);
         }
         return null;
     }
 
-    private String getFileExtension(String fileName) {
-        if (fileName == null || fileName.isEmpty()) {
-            return "";
+    private String getFileExtension(String originalFileName) {
+        if (originalFileName == null || originalFileName.isEmpty()) {
+            return "unknown";
         }
-        int lastDotIndex = fileName.lastIndexOf(".");
-        if (lastDotIndex == -1) {
-            return "";
+        int lastDotIndex = originalFileName.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < originalFileName.length() - 1) {
+            return originalFileName.substring(lastDotIndex + 1).toLowerCase();
         }
-        return fileName.substring(lastDotIndex + 1).toLowerCase();
+        return "unknown";
     }
 }

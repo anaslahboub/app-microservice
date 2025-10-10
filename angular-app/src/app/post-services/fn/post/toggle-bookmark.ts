@@ -7,13 +7,13 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { Bookmark } from '../../models/bookmark';
+import { BookmarkResult } from '../../models/bookmark-result';
 
 export interface ToggleBookmark$Params {
   'post-id': number;
 }
 
-export function toggleBookmark(http: HttpClient, rootUrl: string, params: ToggleBookmark$Params, context?: HttpContext): Observable<StrictHttpResponse<Bookmark>> {
+export function toggleBookmark(http: HttpClient, rootUrl: string, params: ToggleBookmark$Params, context?: HttpContext): Observable<StrictHttpResponse<BookmarkResult>> {
   const rb = new RequestBuilder(rootUrl, toggleBookmark.PATH, 'post');
   if (params) {
     rb.path('post-id', params['post-id'], {});
@@ -24,7 +24,7 @@ export function toggleBookmark(http: HttpClient, rootUrl: string, params: Toggle
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Bookmark>;
+      return r as StrictHttpResponse<BookmarkResult>;
     })
   );
 }

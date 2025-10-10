@@ -1,16 +1,13 @@
 package com.anas.postservice.controller;
 
 
-import com.anas.postservice.dto.CreatePostRequest;
-import com.anas.postservice.dto.PostResponse;
+import com.anas.postservice.dto.*;
 import com.anas.postservice.entities.Comment;
 import com.anas.postservice.entities.Like;
 import com.anas.postservice.entities.Post;
-import com.anas.postservice.entities.Vote;
 import com.anas.postservice.entities.Bookmark;
 import com.anas.postservice.enumeration.PostStatus;
 import com.anas.postservice.service.PostService;
-import com.anas.postservice.dto.PostRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,38 +42,29 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Post>> getAllPosts(
+    public ResponseEntity<Page<Post>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        List<Post> postResponses = postService.getAllPosts(pageable);
+        Page<Post> postResponses = postService.getAllPosts(pageable);
         return ResponseEntity.ok(postResponses);
     }
 
     @GetMapping("/my-posts")
-    public ResponseEntity<List<Post>> getMyPosts(
+    public ResponseEntity<Page<Post>> getMyPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Authentication authentication) {
 
         String userId = authentication.getName();
         Pageable pageable = PageRequest.of(page, size);
-        List<Post> posts = postService.getPostsByAuthorId(userId, pageable);
+        Page<Post> posts = postService.getPostsByAuthorId(userId, pageable);
         return ResponseEntity.ok(posts);
     }
 
 
-    @GetMapping("/group/{group-id}")
-    public ResponseEntity<Page<Post>> getPostsByGroupId(
-            @PathVariable("group-id") String groupId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Post> posts = postService.getApprovedPostsByGroupId(groupId, pageable);
-        return ResponseEntity.ok(posts);
-    }
 
     @GetMapping("/trending")
     public ResponseEntity<Page<Post>> getTrendingPosts(
@@ -85,12 +73,6 @@ public class PostController {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Post> posts = postService.getTrendingPosts(pageable);
-        return ResponseEntity.ok(posts);
-    }
-
-    @GetMapping("/pinned/{group-id}")
-    public ResponseEntity<List<Post>> getPinnedPosts(@PathVariable("group-id") String groupId) {
-        List<Post> posts = postService.getPinnedPostsByGroupId(groupId);
         return ResponseEntity.ok(posts);
     }
 
@@ -127,46 +109,21 @@ public class PostController {
     }
 
     @DeleteMapping("/{post-id}")
-    public ResponseEntity<Void> deletePost(@PathVariable("post-id") Long postId) {
-        postService.deletePost(postId);
+    public ResponseEntity<Void> deletePost(@PathVariable("post-id") Long postId,
+                                           Authentication authentication) {
+        String userId = authentication.getName();
+        postService.deletePost(postId, userId);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> deletePosts(@RequestParam List<Long> postIds) {
-        postService.deletePosts(postIds);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{post-id}/vote")
-    public ResponseEntity<Vote> votePost(
-            @PathVariable("post-id") Long postId,
-            @RequestParam("upvote") boolean upvote,
-            Authentication authentication) {
-
-        String userId = authentication.getName();
-        Vote vote = postService.votePost(postId, userId, upvote);
-        return ResponseEntity.ok(vote);
-    }
-
-    @GetMapping("/{post-id}/voted")
-    public ResponseEntity<Boolean> isPostVotedByUser(
-            @PathVariable("post-id") Long postId,
-            @RequestParam("upvote") boolean upvote,
-            Authentication authentication) {
-
-        String userId = authentication.getName();
-        boolean voted = postService.isPostVotedByUser(postId, userId, upvote);
-        return ResponseEntity.ok(voted);
-    }
 
     @PostMapping("/{post-id}/like")
-    public ResponseEntity<Like> toggleLike(
+    public ResponseEntity<LikeResponse> toggleLike(
             @PathVariable("post-id") Long postId,
             Authentication authentication) {
 
         String userId = authentication.getName();
-        Like like = postService.toggleLike(postId, userId);
+        LikeResponse like = postService.toggleLike(postId, userId);
         return ResponseEntity.ok(like);
     }
 
@@ -181,12 +138,12 @@ public class PostController {
     }
 
     @PostMapping("/{post-id}/bookmark")
-    public ResponseEntity<Bookmark> toggleBookmark(
+    public ResponseEntity<BookmarkResult> toggleBookmark(
             @PathVariable("post-id") Long postId,
             Authentication authentication) {
 
         String userId = authentication.getName();
-        Bookmark bookmark = postService.toggleBookmark(postId, userId);
+        BookmarkResult bookmark = postService.toggleBookmark(postId, userId);
         return ResponseEntity.ok(bookmark);
     }
 
@@ -223,44 +180,36 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
-    @GetMapping("/group/{group-id}/search")
-    public ResponseEntity<Page<Post>> searchPostsInGroup(
-            @PathVariable("group-id") String groupId,
-            @RequestParam("query") String query,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Post> posts = postService.searchApprovedPostsInGroup(groupId, query, pageable);
-        return ResponseEntity.ok(posts);
-    }
-
-    @PostMapping("/{post-id}/comment")
-    public ResponseEntity<Comment> addComment(
-            @PathVariable("post-id") Long postId,
-            @RequestParam("content") String content,
-            @RequestParam(value = "parent-comment-id", required = false) Long parentCommentId,
+    @PostMapping("/{postId}/comments")
+    public ResponseEntity<CommentResponse> addComment(
+            @PathVariable Long postId,
+            @RequestParam String content,
+            @RequestParam(required = false) Long parentCommentId,
             Authentication authentication) {
 
         String userId = authentication.getName();
-        Comment comment = postService.addComment(postId, content, userId, parentCommentId);
+        CommentResponse comment = postService.addComment(postId, content, userId, parentCommentId);
         return ResponseEntity.ok(comment);
     }
 
-    @GetMapping("/{post-id}/comments")
-    public ResponseEntity<Page<Comment>> getComments(
-            @PathVariable("post-id") Long postId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<List<CommentResponse>> getCommentsWithReplies(
+            @PathVariable Long postId) {
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Comment> comments = postService.getCommentsByPostId(postId, pageable);
+        List<CommentResponse> comments = postService.getCommentsWithReplies(postId);
         return ResponseEntity.ok(comments);
     }
 
-    @GetMapping("/comment/{comment-id}/replies")
-    public ResponseEntity<List<Comment>> getReplies(@PathVariable("comment-id") Long commentId) {
-        List<Comment> replies = postService.getRepliesByParentCommentId(commentId);
-        return ResponseEntity.ok(replies);
+    // Si vous voulez garder la pagination pour les commentaires principaux seulement
+    @GetMapping("/{postId}/comments/paginated")
+    public ResponseEntity<Page<CommentResponse>> getCommentsPaginated(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<CommentResponse> comments = postService.getMainCommentsByPostId(postId, pageable);
+        return ResponseEntity.ok(comments);
     }
 }

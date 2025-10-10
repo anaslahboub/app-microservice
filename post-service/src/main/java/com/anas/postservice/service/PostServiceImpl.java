@@ -1,11 +1,9 @@
 package com.anas.postservice.service;
 
 import com.anas.postservice.client.UserServiceClient;
-import com.anas.postservice.dto.CreatePostRequest;
-import com.anas.postservice.dto.PostResponse;
+import com.anas.postservice.dto.*;
 import com.anas.postservice.enumeration.PostStatus;
-import com.anas.postservice.exception.PostNotFoundException;
-import com.anas.postservice.exception.UserServiceException;
+import com.anas.postservice.exception.*;
 import com.anas.postservice.mapper.PostMapper;
 import com.anas.postservice.model.User;
 import com.anas.postservice.entities.*;
@@ -28,7 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import feign.FeignException;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,22 +39,20 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
-    private final VoteRepository voteRepository;
+    // Removed VoteRepository
+    // private final VoteRepository voteRepository;
     private final BookmarkRepository bookmarkRepository;
     private final UserServiceClient userServiceClient;
     private final FileService fileService;
     private final NotificationService notificationService;
 
-
-
-
-    public List<Post> getAllPosts(Pageable pageable) {
+    public Page<Post> getAllPosts(Pageable pageable) {
         log.info("Fetching posts from database - page: {}, size: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
-        List<Post>  posts = postRepository.findAllOrderByCreatedDateDesc(pageable);
+        Page<Post>  posts = postRepository.findAllOrderByCreatedDateDesc(pageable);
          return posts;
     }
-    public List<Post> getPostsByAuthorId(String authorId, Pageable pageable) {
+    public Page<Post> getPostsByAuthorId(String authorId, Pageable pageable) {
         log.info("fetchin posts for current user with id {}", authorId);
         return postRepository.findPostsByAuthorId(authorId, pageable);
     }
@@ -65,26 +62,17 @@ public class PostServiceImpl implements PostService {
         return postRepository.findTrendingPosts(pageable);
     }
 
-    public List<Post> getPinnedPostsByGroupId(String groupId) {
-        return postRepository.findPinnedPostsByGroupId(groupId);
+    @Override
+    public Post getPostById(Long id) {
+        return postRepository.getPostById(id);
     }
-
-
 
     public Page<Post> getPendingPostsByAuthorId(String authorId, Pageable pageable) {
         return postRepository.findPendingPostsByAuthorId(authorId, pageable);
     }
 
-    public Page<Post> getApprovedPostsByGroupId(String groupId, Pageable pageable) {
-        return postRepository.findApprovedPostsByGroupId(groupId, pageable);
-    }
-
     public Page<Post> searchApprovedPosts(String query, Pageable pageable) {
         return postRepository.searchApprovedPosts(query, pageable);
-    }
-
-    public Page<Post> searchApprovedPostsInGroup(String groupId, String query, Pageable pageable) {
-        return postRepository.searchApprovedPostsInGroup(groupId, query, pageable);
     }
 
     @Transactional
@@ -130,11 +118,8 @@ public class PostServiceImpl implements PostService {
         if (savedPost.isApproved()) {
             sendNewPostNotification(savedPost, author);
         }
-
         return savedPost;
     }
-
-
 
     @Transactional
     public Post updatePostStatus(Long postId, PostStatus status) {
@@ -172,41 +157,33 @@ public class PostServiceImpl implements PostService {
     }
 
     @Transactional
-    public void deletePost(Long postId) {
-        if (!postRepository.existsById(postId)) {
-            throw new PostNotFoundException(postId);
-        }
-        postRepository.deleteById(postId);
-    }
-
-    @Transactional
-    public void deletePosts(List<Long> postIds) {
-        postRepository.deleteAllById(postIds);
-    }
-
-    @Transactional
-    public Like toggleLike(Long postId, String userId) {
-        final User user;
-        try {
-             user = userServiceClient.getUserById(userId);
-        } catch (FeignException e) {
-            throw new RuntimeException("Error fetching user information: " + e.getMessage());
-        }
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
+    public void deletePost(Long postId, String userId) {
+        // Une seule requête à la base de données
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
 
-        // Check if user already liked the post
+        // Vérification des autorisations
+        if (!post.getAuthorId().equals(userId)) {
+            throw new UnauthorizedActionException("You don't have permission to delete this post");
+        }
+
+        postRepository.deleteById(postId);
+    }
+
+
+    /*@Transactional
+    public Like toggleLike(Long postId, String userId) {
+        User user = fetchAndValidateUser(userId);
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException(postId));
+
         return likeRepository.findByPostIdAndUserId(postId, userId)
                 .map(like -> {
                     // Unlike
                     likeRepository.delete(like);
                     post.setLikeCount(post.getLikeCount() - 1);
                     Post updatedPost = postRepository.save(post);
-
-                    // Send notification to post author about unlike
                     sendUnlikeNotification(updatedPost, user);
 
                     return (Like) null;
@@ -226,105 +203,48 @@ public class PostServiceImpl implements PostService {
                     return savedLike;
                 });
     }
+    */
+
+    @Transactional
+    public LikeResponse toggleLike(Long postId, String userId) {
+        User user = fetchAndValidateUser(userId);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException(postId));
+
+        Optional<Like> existingLike = likeRepository.findByPostIdAndUserId(postId, userId);
+
+        if (existingLike.isPresent()) {
+            // Unlike - suppression seulement
+            Like like = existingLike.get();
+            likeRepository.delete(like);
+            post.setLikeCount(post.getLikeCount() - 1);
+            Post updatedPost = postRepository.save(post);
+            sendUnlikeNotification(updatedPost, user);
+
+            return new LikeResponse(null, false, "unliked", updatedPost.getLikeCount());
+        } else {
+            // Like - création seulement
+            Like like = new Like();
+            like.setPost(post);
+            like.setUserId(userId);
+            Like savedLike = likeRepository.save(like);
+            post.setLikeCount(post.getLikeCount() + 1);
+            Post updatedPost = postRepository.save(post);
+            sendLikeNotification(updatedPost, user);
+
+            return new LikeResponse(savedLike, true, "liked", updatedPost.getLikeCount());
+        }
+    }
 
     public boolean isPostLikedByUser(Long postId, String userId) {
         return likeRepository.findByPostIdAndUserId(postId, userId).isPresent();
     }
 
-    @Transactional
-    public Vote votePost(Long postId, String userId, boolean upvote) {
-        final User user ;
-        try {
-            user = userServiceClient.getUserById(userId);
-        } catch (FeignException e) {
-            throw new RuntimeException("Error fetching user information: " + e.getMessage());
-        }
 
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
-
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
-
-        // Check if user already voted on this post
-        return voteRepository.findByPostIdAndUserId(postId, userId)
-                .map(existingVote -> {
-                    // If same vote type, remove the vote
-                    if (existingVote.isUpvote() == upvote) {
-                        voteRepository.delete(existingVote);
-                        // Update post vote counts
-                        if (upvote) {
-                            post.setUpvoteCount(post.getUpvoteCount() - 1);
-                        } else {
-                            post.setDownvoteCount(post.getDownvoteCount() - 1);
-                        }
-                        Post updatedPost = postRepository.save(post);
-
-                        // Send notification to post author about vote removal
-                        sendVoteRemovedNotification(updatedPost, user, upvote);
-
-                        return (Vote) null;
-                    } else {
-                        // Change vote type
-                        existingVote.setUpvote(upvote);
-                        Vote savedVote = voteRepository.save(existingVote);
-                        // Update post vote counts
-                        if (upvote) {
-                            post.setUpvoteCount(post.getUpvoteCount() + 1);
-                            post.setDownvoteCount(post.getDownvoteCount() - 1);
-                        } else {
-                            post.setUpvoteCount(post.getUpvoteCount() - 1);
-                            post.setDownvoteCount(post.getDownvoteCount() + 1);
-                        }
-                        Post updatedPost = postRepository.save(post);
-
-                        // Send notification to post author about vote change
-                        sendVoteChangedNotification(updatedPost, user, upvote);
-
-                        return savedVote;
-                    }
-                })
-                .orElseGet(() -> {
-                    // Create new vote
-                    Vote vote = new Vote();
-                    vote.setPost(post);
-                    vote.setUserId(userId);
-                    vote.setUpvote(upvote);
-                    Vote savedVote = voteRepository.save(vote);
-                    // Update post vote counts
-                    if (upvote) {
-                        post.setUpvoteCount(post.getUpvoteCount() + 1);
-                    } else {
-                        post.setDownvoteCount(post.getDownvoteCount() + 1);
-                    }
-                    Post updatedPost = postRepository.save(post);
-
-                    // Send notification to post author about new vote
-                    sendNewVoteNotification(updatedPost, user, upvote);
-
-                    return savedVote;
-                });
-    }
-
-    public boolean isPostVotedByUser(Long postId, String userId, boolean upvote) {
-        return voteRepository.findByPostIdAndUserId(postId, userId)
-                .map(vote -> vote.isUpvote() == upvote)
-                .orElse(false);
-    }
-
+    /*
     @Transactional
     public Bookmark toggleBookmark(Long postId, String userId) {
-        final User user;
-        try {
-            user = userServiceClient.getUserById(userId);
-        } catch (FeignException e) {
-            throw new RuntimeException("Error fetching user information: " + e.getMessage());
-        }
-
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
+         User user= fetchAndValidateUser(userId);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
@@ -336,8 +256,6 @@ public class PostServiceImpl implements PostService {
                     bookmarkRepository.delete(bookmark);
                     post.setBookmarkCount(post.getBookmarkCount() - 1);
                     Post updatedPost = postRepository.save(post);
-
-                    // Send notification to post author about bookmark removal
                     sendBookmarkRemovedNotification(updatedPost, user);
 
                     return (Bookmark) null;
@@ -357,6 +275,37 @@ public class PostServiceImpl implements PostService {
                     return savedBookmark;
                 });
     }
+    /*/
+
+    @Transactional
+    public BookmarkResult toggleBookmark(Long postId, String userId) {
+        User user = fetchAndValidateUser(userId);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException(postId));
+
+        Optional<Bookmark> existingBookmark = bookmarkRepository.findByPostIdAndUserId(postId, userId);
+
+        if (existingBookmark.isPresent()) {
+            // Remove bookmark
+            bookmarkRepository.delete(existingBookmark.get());
+            post.setBookmarkCount(post.getBookmarkCount() - 1);
+            postRepository.save(post);
+            sendBookmarkRemovedNotification(post, user);
+
+            return new BookmarkResult(null, false, post.getBookmarkCount(), "removed");
+        } else {
+            // Create bookmark
+            Bookmark bookmark = new Bookmark();
+            bookmark.setPost(post);
+            bookmark.setUserId(userId);
+            Bookmark savedBookmark = bookmarkRepository.save(bookmark);
+            post.setBookmarkCount(post.getBookmarkCount() + 1);
+            postRepository.save(post);
+            sendNewBookmarkNotification(post, user);
+
+            return new BookmarkResult(savedBookmark, true, post.getBookmarkCount(), "added");
+        }
+    }
 
     public boolean isPostBookmarkedByUser(Long postId, String userId) {
         return bookmarkRepository.findByPostIdAndUserId(postId, userId).isPresent();
@@ -366,89 +315,99 @@ public class PostServiceImpl implements PostService {
         return bookmarkRepository.findBookmarkedPostsByUserId(userId, pageable);
     }
 
-    @Transactional
-    public Comment addComment(Long postId, String content, String authorId, Long parentCommentId) {
-        User author = null;
-        try {
-            author = userServiceClient.getUserById(authorId);
-        } catch (FeignException e) {
-            throw new RuntimeException("Error fetching user information: " + e.getMessage());
+    public CommentResponse addComment(Long postId, String content, String userId, Long parentCommentId) {
+        // Validation
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("Comment content cannot be empty");
         }
 
-        if (author == null) {
-            throw new RuntimeException("User not found");
-        }
-
+        // Vérifier le post
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
 
+        // Créer le commentaire
         Comment comment = new Comment();
-        comment.setContent(content);
+        comment.setContent(content.trim());
         comment.setPost(post);
-        comment.setAuthorId(authorId);
+        comment.setAuthorId(userId);
 
+        // Gérer la réponse si parentCommentId existe
         if (parentCommentId != null) {
             Comment parentComment = commentRepository.findById(parentCommentId)
-                    .orElseThrow(() -> new RuntimeException("Parent comment not found"));
+                    .orElseThrow(() -> new ParentCommentNotFoundException(parentCommentId));
             comment.setParentComment(parentComment);
         }
 
         Comment savedComment = commentRepository.save(comment);
 
-        // Update comment count on post
+        // Mettre à jour le compteur
         post.setCommentCount(post.getCommentCount() + 1);
-        Post updatedPost = postRepository.save(post);
+        postRepository.save(post);
 
-        // Send notification to post author about new comment
-        sendNewCommentNotification(updatedPost, comment, author);
-
-        return savedComment;
+        // Convertir en Response
+        return mapToCommentResponse(savedComment);
     }
 
-    public Page<Comment> getCommentsByPostId(Long postId, Pageable pageable) {
-        return commentRepository.findRootCommentsByPostId(postId, pageable);
+    public List<CommentResponse> getCommentsWithReplies(Long postId) {
+        // Récupérer tous les commentaires du post
+        List<Comment> allComments = commentRepository.findByPostIdOrderByCreatedDateDesc(postId);
+
+        return buildCommentTree(allComments);
     }
 
-    public List<Comment> getRepliesByParentCommentId(Long parentCommentId) {
-        return commentRepository.findRepliesByParentCommentId(parentCommentId);
+    public Page<CommentResponse> getMainCommentsByPostId(Long postId, Pageable pageable) {
+        Page<Comment> mainComments = commentRepository.findByPostIdAndParentCommentIsNull(postId, pageable);
+
+        return mainComments.map(this::mapToCommentResponse);
     }
 
+    private List<CommentResponse> buildCommentTree(List<Comment> allComments) {
+        Map<Long, CommentResponse> commentMap = new HashMap<>();
+        List<CommentResponse> mainComments = new ArrayList<>();
 
+        // Premier passage : créer tous les DTOs
+        for (Comment comment : allComments) {
+            CommentResponse response = mapToCommentResponse(comment);
+            commentMap.put(comment.getId(), response);
 
-
-    // Méthode privée centralisée
-    private Post createPostInternal(String content, MultipartFile imageFile, String imageUrl, String groupId, String authorId) {
-        // 1. Validate user
-        User author = fetchAndValidateUser(authorId);
-
-        // 2. Create post entity
-        Post post = new Post();
-        post.setContent(content);
-        post.setGroupId(groupId);
-        post.setAuthorId(authorId);
-        post.setStatus(determinePostStatus());
-
-        // 3. Handle image URL if provided directly
-        if (imageUrl != null) {
-            post.setImageUrl(imageUrl);
+            if (comment.getParentComment() == null) {
+                mainComments.add(response);
+            }
         }
 
-        // 4. Save post first to get ID
-        Post savedPost = postRepository.save(post);
-
-        // 5. Handle image file upload if provided
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String uploadedImageUrl = fileService.saveFile(imageFile, savedPost.getId(), authorId);
-            savedPost.setImageUrl(uploadedImageUrl);
-            // Pas besoin de re-save ici si tu utilises un entity manager géré
+        // Deuxième passage : organiser les réponses
+        for (Comment comment : allComments) {
+            if (comment.getParentComment() != null) {
+                CommentResponse parentResponse = commentMap.get(comment.getParentComment().getId());
+                if (parentResponse != null) {
+                    if (parentResponse.getReplies() == null) {
+                        parentResponse.setReplies(new ArrayList<>());
+                    }
+                    parentResponse.getReplies().add(commentMap.get(comment.getId()));
+                }
+            }
         }
 
-        // 6. Send notification if approved
-        if (savedPost.isApproved()) {
-            sendNewPostNotification(savedPost, author);
+        return mainComments;
+    }
+
+    private CommentResponse mapToCommentResponse(Comment comment) {
+        CommentResponse response = new CommentResponse();
+        response.setId(comment.getId());
+        response.setContent(comment.getContent());
+        response.setAuthorId(comment.getAuthorId());
+        response.setPostId(comment.getPost().getId());
+        response.setCreatedDate(comment.getCreatedDate());
+        response.setReply(comment.getParentComment() != null);
+
+        if (comment.getParentComment() != null) {
+            response.setParentCommentId(comment.getParentComment().getId());
         }
 
-        return savedPost;
+        response.setReplies(new ArrayList<>()); // Initialiser la liste des réponses
+
+        return response;
+
     }
 
     // Helper methods
@@ -543,48 +502,6 @@ public class PostServiceImpl implements PostService {
 
     private void sendUnlikeNotification(Post post, User unliker) {
         // Unlike notifications are typically not sent
-    }
-
-    private void sendNewVoteNotification(Post post, User voter, boolean upvote) {
-        try {
-            NotificationDTO notification = new NotificationDTO();
-            notification.setType(upvote ? "POST_UPVOTED" : "POST_DOWNVOTED");
-            notification.setPostId(post.getId());
-            notification.setPostContent(post.getContent().length() > 100 ?
-                post.getContent().substring(0, 100) + "..." : post.getContent());
-            notification.setMessage(voter.getFullName() + " " + (upvote ? "upvoted" : "downvoted") + " your post");
-            notification.setUserId(post.getAuthorId());
-            notification.setUserName(voter.getFullName());
-            notification.setRelatedEntityId(post.getId());
-            notification.setRelatedEntityType("POST");
-
-            notificationService.sendUserNotification(post.getAuthorId(), notification);
-        } catch (Exception e) {
-            System.err.println("Error sending vote notification: " + e.getMessage());
-        }
-    }
-
-    private void sendVoteChangedNotification(Post post, User voter, boolean upvote) {
-        try {
-            NotificationDTO notification = new NotificationDTO();
-            notification.setType(upvote ? "POST_UPVOTED" : "POST_DOWNVOTED");
-            notification.setPostId(post.getId());
-            notification.setPostContent(post.getContent().length() > 100 ?
-                post.getContent().substring(0, 100) + "..." : post.getContent());
-            notification.setMessage(voter.getFullName() + " changed their vote to " + (upvote ? "upvote" : "downvote"));
-            notification.setUserId(post.getAuthorId());
-            notification.setUserName(voter.getFullName());
-            notification.setRelatedEntityId(post.getId());
-            notification.setRelatedEntityType("POST");
-
-            notificationService.sendUserNotification(post.getAuthorId(), notification);
-        } catch (Exception e) {
-            System.err.println("Error sending vote changed notification: " + e.getMessage());
-        }
-    }
-
-    private void sendVoteRemovedNotification(Post post, User voter, boolean upvote) {
-        // Vote removal notifications are typically not sent
     }
 
     private void sendNewBookmarkNotification(Post post, User bookmarker) {

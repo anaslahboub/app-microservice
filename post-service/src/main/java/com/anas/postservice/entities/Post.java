@@ -2,6 +2,7 @@ package com.anas.postservice.entities;
 
 import com.anas.postservice.common.BaseAuditingEntity;
 import com.anas.postservice.enumeration.PostStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,7 +41,6 @@ public class Post extends BaseAuditingEntity implements Serializable {
     // Store author ID directly instead of JPA relationship
     private String authorId;
 
-    private String groupId;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
@@ -49,18 +49,11 @@ public class Post extends BaseAuditingEntity implements Serializable {
     private List<Like> likes;
     
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Vote> votes;
-    
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Bookmark> bookmarks;
 
     private Long likeCount = 0L;
 
     private Long commentCount = 0L;
-    
-    private Long upvoteCount = 0L;
-    
-    private Long downvoteCount = 0L;
     
     private Long bookmarkCount = 0L;
 
@@ -87,5 +80,15 @@ public class Post extends BaseAuditingEntity implements Serializable {
             return "";
         }
         return this.content.length() > 100 ? this.content.substring(0, 100) + "..." : this.content;
+    }
+    @Transient
+    public void incrementLikeCount() {
+        this.likeCount++;
+    }
+    @Transient
+    public void decrementLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
     }
 }

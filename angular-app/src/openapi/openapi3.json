@@ -59,6 +59,46 @@
       }
     },
     "/api/v1/posts": {
+      "get": {
+        "tags": [
+          "Post"
+        ],
+        "operationId": "getAllPosts",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelPost"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Post"
@@ -85,55 +125,22 @@
             }
           }
         }
-      },
-      "delete": {
-        "tags": [
-          "Post"
-        ],
-        "operationId": "deletePosts",
-        "parameters": [
-          {
-            "name": "postIds",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
       }
     },
-    "/api/v1/posts/{post-id}/vote": {
-      "post": {
+    "/api/v1/posts/{postId}/comments": {
+      "get": {
         "tags": [
           "Post"
         ],
-        "operationId": "votePost",
+        "operationId": "getCommentsWithReplies",
         "parameters": [
           {
-            "name": "post-id",
+            "name": "postId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
-          },
-          {
-            "name": "upvote",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -143,7 +150,89 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Vote"
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "content": {
+                        "type": "string"
+                      },
+                      "authorId": {
+                        "type": "string"
+                      },
+                      "postId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "parentCommentId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "replies": {
+                        "type": "array",
+                        "items": {
+
+                        }
+                      },
+                      "reply": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Post"
+        ],
+        "operationId": "addComment",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parentCommentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentResponse"
                 }
               }
             }
@@ -174,55 +263,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Like"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/posts/{post-id}/comment": {
-      "post": {
-        "tags": [
-          "Post"
-        ],
-        "operationId": "addComment",
-        "parameters": [
-          {
-            "name": "post-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "content",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "parent-comment-id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Comment"
+                  "$ref": "#/components/schemas/LikeResponse"
                 }
               }
             }
@@ -253,7 +294,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Bookmark"
+                  "$ref": "#/components/schemas/BookmarkResult"
                 }
               }
             }
@@ -393,85 +434,15 @@
         }
       }
     },
-    "/api/v1/posts/{post-id}/voted": {
+    "/api/v1/posts/{postId}/comments/paginated": {
       "get": {
         "tags": [
           "Post"
         ],
-        "operationId": "isPostVotedByUser",
+        "operationId": "getCommentsPaginated",
         "parameters": [
           {
-            "name": "post-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "upvote",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/posts/{post-id}/liked": {
-      "get": {
-        "tags": [
-          "Post"
-        ],
-        "operationId": "isPostLikedByUser",
-        "parameters": [
-          {
-            "name": "post-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/posts/{post-id}/comments": {
-      "get": {
-        "tags": [
-          "Post"
-        ],
-        "operationId": "getComments",
-        "parameters": [
-          {
-            "name": "post-id",
+            "name": "postId",
             "in": "path",
             "required": true,
             "schema": {
@@ -506,7 +477,38 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PagedModelComment"
+                  "$ref": "#/components/schemas/PagedModelCommentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/posts/{post-id}/liked": {
+      "get": {
+        "tags": [
+          "Post"
+        ],
+        "operationId": "isPostLikedByUser",
+        "parameters": [
+          {
+            "name": "post-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
                 }
               }
             }
@@ -637,39 +639,6 @@
         }
       }
     },
-    "/api/v1/posts/pinned/{group-id}": {
-      "get": {
-        "tags": [
-          "Post"
-        ],
-        "operationId": "getPinnedPosts",
-        "parameters": [
-          {
-            "name": "group-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Post"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/posts/my-posts": {
       "get": {
         "tags": [
@@ -754,148 +723,6 @@
         }
       }
     },
-    "/api/v1/posts/group/{group-id}": {
-      "get": {
-        "tags": [
-          "Post"
-        ],
-        "operationId": "getPostsByGroupId",
-        "parameters": [
-          {
-            "name": "group-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 10
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PagedModelPost"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/posts/group/{group-id}/search": {
-      "get": {
-        "tags": [
-          "Post"
-        ],
-        "operationId": "searchPostsInGroup",
-        "parameters": [
-          {
-            "name": "group-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "query",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 10
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PagedModelPost"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/posts/comment/{comment-id}/replies": {
-      "get": {
-        "tags": [
-          "Post"
-        ],
-        "operationId": "getReplies",
-        "parameters": [
-          {
-            "name": "comment-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Comment"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/posts/bookmarks": {
       "get": {
         "tags": [
@@ -931,6 +758,29 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PagedModelPost"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/files/debug/info": {
+      "get": {
+        "tags": [
+          "File"
+        ],
+        "operationId": "getDebugInfo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+
+                  }
                 }
               }
             }
@@ -1197,9 +1047,6 @@
           "authorId": {
             "type": "string"
           },
-          "groupId": {
-            "type": "string"
-          },
           "comments": {
             "type": "array",
             "items": {
@@ -1210,12 +1057,6 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Like"
-            }
-          },
-          "votes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Vote"
             }
           },
           "bookmarks": {
@@ -1232,14 +1073,6 @@
             "type": "integer",
             "format": "int64"
           },
-          "upvoteCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "downvoteCount": {
-            "type": "integer",
-            "format": "int64"
-          },
           "bookmarkCount": {
             "type": "integer",
             "format": "int64"
@@ -1250,37 +1083,86 @@
           "approved": {
             "type": "boolean"
           },
-          "rejected": {
-            "type": "boolean"
+          "summary": {
+            "type": "string"
           },
           "pending": {
             "type": "boolean"
           },
-          "summary": {
-            "type": "string"
+          "rejected": {
+            "type": "boolean"
           }
         }
       },
-      "Vote": {
+      "CommentResponse": {
         "type": "object",
         "properties": {
-          "createdDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModifiedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "id": {
             "type": "integer",
             "format": "int64"
           },
-          "userId": {
+          "content": {
             "type": "string"
           },
-          "upvote": {
+          "authorId": {
+            "type": "string"
+          },
+          "postId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "parentCommentId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "replies": {
+            "type": "array",
+            "items": {
+
+            }
+          },
+          "reply": {
             "type": "boolean"
+          }
+        }
+      },
+      "LikeResponse": {
+        "type": "object",
+        "properties": {
+          "like": {
+            "$ref": "#/components/schemas/Like"
+          },
+          "liked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "likeCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BookmarkResult": {
+        "type": "object",
+        "properties": {
+          "bookmark": {
+            "$ref": "#/components/schemas/Bookmark"
+          },
+          "bookmarked": {
+            "type": "boolean"
+          },
+          "bookmarkCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "action": {
+            "type": "string"
           }
         }
       },
@@ -1305,20 +1187,6 @@
           }
         }
       },
-      "PagedModelComment": {
-        "type": "object",
-        "properties": {
-          "content": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Comment"
-            }
-          },
-          "page": {
-            "$ref": "#/components/schemas/PageMetadata"
-          }
-        }
-      },
       "PagedModelPost": {
         "type": "object",
         "properties": {
@@ -1326,6 +1194,20 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Post"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "PagedModelCommentResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentResponse"
             }
           },
           "page": {

@@ -42,7 +42,8 @@ public class SecurityConfig {
                             "/swagger-ui/**",
                             "/webjars/**",
                             "/swagger-ui.html",
-                            "/ws/**")
+                            "/ws/**",
+                            "/post-uploads/**")  // Allow access to uploaded files
                     .permitAll()
                 .requestMatchers("/api/health/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()

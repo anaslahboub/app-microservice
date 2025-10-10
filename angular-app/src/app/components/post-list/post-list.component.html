@@ -2,11 +2,22 @@
   <div class="d-flex justify-content-between align-items-center gap-2 p-2">
     <h4>Posts</h4>
     <div class="d-flex gap-2">
-      <button class="btn btn-sm btn-outline-primary" (click)="loadPosts()">My Posts</button>
+      <button class="btn btn-sm btn-outline-primary" (click)="loadAllPosts()">All</button>
+      <button class="btn btn-sm btn-outline-primary" (click)="loadMyPosts()">My Posts</button>
+      <button class="btn btn-sm btn-outline-primary" (click)="loadMyPendingPosts()">Pending</button>
       <button class="btn btn-sm btn-outline-secondary" (click)="loadTrendingPosts()">Trending</button>
       <button class="btn btn-sm btn-outline-success" (click)="loadBookmarkedPosts()">Bookmarks</button>
     </div>
   </div>
+  
+  <!-- Post Status Filter -->
+  <div class="d-flex flex-wrap gap-2 p-2">
+    <button class="btn btn-sm" [class.btn-primary]="postStatusFilter === 'ALL'" [class.btn-outline-primary]="postStatusFilter !== 'ALL'" (click)="setPostStatusFilter('ALL')">All</button>
+    <button class="btn btn-sm" [class.btn-warning]="postStatusFilter === 'PENDING'" [class.btn-outline-warning]="postStatusFilter !== 'PENDING'" (click)="setPostStatusFilter('PENDING')">Pending</button>
+    <button class="btn btn-sm" [class.btn-success]="postStatusFilter === 'APPROVED'" [class.btn-outline-success]="postStatusFilter !== 'APPROVED'" (click)="setPostStatusFilter('APPROVED')">Approved</button>
+    <button class="btn btn-sm" [class.btn-danger]="postStatusFilter === 'REJECTED'" [class.btn-outline-danger]="postStatusFilter !== 'REJECTED'" (click)="setPostStatusFilter('REJECTED')">Rejected</button>
+  </div>
+  
   <div class="d-flex flex-column gap-1 p-2">
     <div class="input-group">
       <span class="input-group-text">
@@ -14,11 +25,6 @@
       </span>
       <input type="text" class="form-control-sm" placeholder="Search posts" [(ngModel)]="searchTerm" (keyup.enter)="searchPosts()" aria-label="Search">
       <button class="btn btn-outline-secondary btn-sm" type="button" (click)="searchPosts()">Search</button>
-    </div>
-    <div class="d-flex gap-2 mt-2">
-      <span class="badge rounded-pill text-bg-light cursor-pointer">All</span>
-      <span class="badge rounded-pill text-bg-light cursor-pointer">Text</span>
-      <span class="badge rounded-pill text-bg-light cursor-pointer">Images</span>
     </div>
   </div>
 </div>
@@ -84,6 +90,13 @@
             <div>
               <h6 class="mb-0">{{ post.authorId || 'Unknown User' }}</h6>
               <small class="text-muted">{{ formatDate(post.createdDate) }}</small>
+              <!-- Post status badge -->
+              <span class="badge ms-2" 
+                [class.bg-warning]="post.status === 'PENDING'" 
+                [class.bg-success]="post.status === 'APPROVED'" 
+                [class.bg-danger]="post.status === 'REJECTED'">
+                {{ post.status || 'UNKNOWN' }}
+              </span>
             </div>
           </div>
           <div class="dropdown">
@@ -91,6 +104,11 @@
               <i class="fas fa-ellipsis-h"></i>
             </button>
             <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" (click)="pinPost(post.id!, !post.pinned)"><i class="fas fa-thumbtack me-2"></i>{{ post.pinned ? 'Unpin' : 'Pin' }}</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" (click)="updatePostStatus(post.id!, 'APPROVED')"><i class="fas fa-check me-2 text-success"></i>Approve</a></li>
+              <li><a class="dropdown-item" href="#" (click)="updatePostStatus(post.id!, 'REJECTED')"><i class="fas fa-times me-2 text-danger"></i>Reject</a></li>
+              <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="#" (click)="deletePost(post.id!)"><i class="fas fa-trash me-2"></i>Delete</a></li>
             </ul>
           </div>
@@ -99,14 +117,58 @@
         <div class="mt-3">
           <p class="card-text">{{ post.content }}</p>
           <div *ngIf="post.imageUrl" class="text-center">
-            <img [src]="post.imageUrl" alt="Post image" class="img-fluid rounded">
+            <img [src]="getFullImageUrl(post.imageUrl)" alt="Post image" class="img-fluid rounded">
+          </div>
+        </div>
+        
+        <!-- Comments section -->
+        <div class="mt-3">
+          <div class="input-group mb-2">
+            <input type="text" class="form-control" placeholder="Write a comment..." [(ngModel)]="newComments[post.id!]" (keyup.enter)="addComment(post.id!)">
+            <button class="btn btn-outline-primary" type="button" (click)="addComment(post.id!)">Post</button>
+          </div>
+          
+          <!-- Display comments -->
+          <div *ngIf="comments[post.id!] && comments[post.id!].length > 0" class="mt-2">
+            <div *ngFor="let comment of comments[post.id!]; let i = index" class="border-bottom pb-2 mb-2">
+              <div class="d-flex">
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between">
+                    <strong>{{ comment.authorId || 'Anonymous' }}</strong>
+                    <small class="text-muted">{{ formatDate(comment.createdDate) }}</small>
+                  </div>
+                  <p class="mb-1">{{ comment.content }}</p>
+                </div>
+              </div>
+              
+              <!-- Replies -->
+              <div *ngIf="comment.replies && comment.replies.length > 0" class="ms-4 mt-2">
+                <div *ngFor="let reply of comment.replies" class="border-bottom pb-1 mb-1">
+                  <div class="d-flex justify-content-between">
+                    <strong>{{ reply.authorId || 'Anonymous' }}</strong>
+                    <small class="text-muted">{{ formatDate(reply.createdDate) }}</small>
+                  </div>
+                  <p class="mb-1">{{ reply.content }}</p>
+                </div>
+              </div>
+              
+              <!-- Load replies button -->
+              <button *ngIf="!comment.replies || comment.replies.length === 0" class="btn btn-sm btn-link p-0" (click)="loadCommentsWithReplies(post.id!)">
+                Load replies
+              </button>
+            </div>
+            
+            <!-- Load more comments button -->
+            <button class="btn btn-sm btn-outline-primary" (click)="loadCommentsPaginated(post.id!)">
+              Load more comments
+            </button>
           </div>
         </div>
         
         <div class="d-flex justify-content-between mt-3">
           <div class="d-flex gap-3">
             <button class="btn btn-light btn-sm d-flex align-items-center" (click)="toggleLike(post.id!)">
-              <i class="fas fa-heart me-1" [class.text-danger]="post.likes && post.likes.length > 0"></i>
+              <i class="fas fa-heart me-1" [class.text-danger]="checkIfPostLiked(post.id!)"></i>
               <span>{{ post.likeCount || 0 }}</span>
             </button>
             <button class="btn btn-light btn-sm d-flex align-items-center">
@@ -114,7 +176,7 @@
               <span>{{ post.commentCount || 0 }}</span>
             </button>
             <button class="btn btn-light btn-sm d-flex align-items-center" (click)="toggleBookmark(post.id!)">
-              <i class="fas fa-bookmark me-1" [class.text-primary]="post.bookmarks && post.bookmarks.length > 0"></i>
+              <i class="fas fa-bookmark me-1" [class.text-primary]="checkIfPostBookmarked(post.id!)"></i>
               <span>{{ post.bookmarkCount || 0 }}</span>
             </button>
           </div>
@@ -124,27 +186,29 @@
         </div>
       </div>
     </div>
-    
-    <!-- Pagination -->
-    <nav aria-label="Posts pagination" class="d-flex justify-content-center">
+  </div>
+  
+  <!-- Empty state -->
+  <div *ngIf="!isLoadingPosts && posts.length === 0" class="text-center py-5">
+    <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+    <h5>No posts yet</h5>
+    <p class="text-muted">Be the first to share something!</p>
+  </div>
+  
+  <!-- Pagination -->
+  <div *ngIf="!isLoadingPosts && posts.length > 0 && totalPages > 1" class="d-flex justify-content-center mt-4">
+    <nav>
       <ul class="pagination">
         <li class="page-item" [class.disabled]="currentPage === 0">
-          <a class="page-link" (click)="goToPage(currentPage - 1)">Previous</a>
+          <a class="page-link" (click)="currentPage = currentPage - 1; loadAllPosts()" tabindex="-1">Previous</a>
         </li>
         <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index" [class.active]="i === currentPage">
-          <a class="page-link" (click)="goToPage(i)">{{ i + 1 }}</a>
+          <a class="page-link" (click)="currentPage = i;  loadAllPosts()">{{ i + 1 }}</a>
         </li>
         <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
-          <a class="page-link" (click)="goToPage(currentPage + 1)">Next</a>
+          <a class="page-link" (click)="currentPage = currentPage + 1; loadAllPosts()">Next</a>
         </li>
       </ul>
     </nav>
-  </div>
-
-  <!-- No posts message -->
-  <div *ngIf="!isLoadingPosts && posts.length === 0" class="text-center p-5">
-    <i class="fas fa-newspaper fa-3x mb-3 text-muted"></i>
-    <h5>No posts found</h5>
-    <p class="text-muted">Be the first to share something!</p>
   </div>
 </div>

@@ -7,13 +7,13 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { Like } from '../../models/like';
+import { LikeResponse } from '../../models/like-response';
 
 export interface ToggleLike$Params {
   'post-id': number;
 }
 
-export function toggleLike(http: HttpClient, rootUrl: string, params: ToggleLike$Params, context?: HttpContext): Observable<StrictHttpResponse<Like>> {
+export function toggleLike(http: HttpClient, rootUrl: string, params: ToggleLike$Params, context?: HttpContext): Observable<StrictHttpResponse<LikeResponse>> {
   const rb = new RequestBuilder(rootUrl, toggleLike.PATH, 'post');
   if (params) {
     rb.path('post-id', params['post-id'], {});
@@ -24,7 +24,7 @@ export function toggleLike(http: HttpClient, rootUrl: string, params: ToggleLike
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Like>;
+      return r as StrictHttpResponse<LikeResponse>;
     })
   );
 }

@@ -16,8 +16,6 @@ public class PostResponse {
     private String authorName; // Ajouté depuis User
     private Long likeCount;
     private Long commentCount;
-    private Long upvoteCount;
-    private Long downvoteCount;
     private Long bookmarkCount;
     private boolean pinned;
     private LocalDateTime createdDate;

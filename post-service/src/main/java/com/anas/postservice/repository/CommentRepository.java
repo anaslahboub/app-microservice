@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     
@@ -22,4 +23,13 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     
     @Query("SELECT COUNT(c) FROM Comment c WHERE c.post.id = :postId AND c.approved = true")
     Long countApprovedCommentsByPostId(@Param("postId") Long postId);
+
+    // Pour l'arbre complet des commentaires
+    List<Comment> findByPostIdOrderByCreatedDateDesc(Long postId);
+
+    // Pour la pagination des commentaires principaux seulement
+    Page<Comment> findByPostIdAndParentCommentIsNull(Long postId, Pageable pageable);
+
+    // Trouver un commentaire par ID
+    Optional<Comment> findById(Long id);
 }

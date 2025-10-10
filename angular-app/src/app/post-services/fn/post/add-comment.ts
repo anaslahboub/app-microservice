@@ -7,20 +7,20 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { Comment } from '../../models/comment';
+import { CommentResponse } from '../../models/comment-response';
 
 export interface AddComment$Params {
-  'post-id': number;
+  postId: number;
   content: string;
-  'parent-comment-id'?: number;
+  parentCommentId?: number;
 }
 
-export function addComment(http: HttpClient, rootUrl: string, params: AddComment$Params, context?: HttpContext): Observable<StrictHttpResponse<Comment>> {
+export function addComment(http: HttpClient, rootUrl: string, params: AddComment$Params, context?: HttpContext): Observable<StrictHttpResponse<CommentResponse>> {
   const rb = new RequestBuilder(rootUrl, addComment.PATH, 'post');
   if (params) {
-    rb.path('post-id', params['post-id'], {});
+    rb.path('postId', params.postId, {});
     rb.query('content', params.content, {});
-    rb.query('parent-comment-id', params['parent-comment-id'], {});
+    rb.query('parentCommentId', params.parentCommentId, {});
   }
 
   return http.request(
@@ -28,9 +28,9 @@ export function addComment(http: HttpClient, rootUrl: string, params: AddComment
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Comment>;
+      return r as StrictHttpResponse<CommentResponse>;
     })
   );
 }
 
-addComment.PATH = '/api/v1/posts/{post-id}/comment';
+addComment.PATH = '/api/v1/posts/{postId}/comments';
