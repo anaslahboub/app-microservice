@@ -208,7 +208,7 @@ public class PostController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<CommentResponse> comments = postService.getMainCommentsByPostId(postId, pageable);
         return ResponseEntity.ok(comments);
     }

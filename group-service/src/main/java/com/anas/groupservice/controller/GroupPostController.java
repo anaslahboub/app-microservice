@@ -80,9 +80,6 @@ public class GroupPostController {
             @PathVariable Long postId,
             Authentication authentication) {
         
-        // In a real implementation, you would check if the user has permission to delete the post
-        // (e.g., they are the post author or a group admin)
-        
         groupPostService.deletePost(postId);
         return ResponseEntity.noContent().build();
     }

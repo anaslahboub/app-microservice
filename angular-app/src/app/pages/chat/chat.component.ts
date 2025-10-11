@@ -1,20 +1,19 @@
 import {AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ChatResponse} from '../../chat-services/models/chat-response';
+import {ChatResponse} from '../../services/chat-services/models/chat-response';
 import {DatePipe} from '@angular/common';
 import * as Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
 import {FormsModule} from '@angular/forms';
 import {PickerComponent} from '@ctrl/ngx-emoji-mart';
-import { MessageRequest, MessageResponse } from '../../chat-services/models';
 import { KeycloakService } from '../../utils/keycloak/KeycloakService';
-import { getChatsByReceiver } from '../../chat-services/fn/chats/get-chats-by-receiver';
-import { getAllMessages } from '../../chat-services/fn/message/get-all-messages';
-import { saveMessage } from '../../chat-services/fn/message/save-message';
-import { setMessageToSeen } from '../../chat-services/fn/message/set-message-to-seen';
-import { uploadMedia as uploadMediaApi } from '../../chat-services/fn/message/upload-media';
-import { Notification } from '../models/notification';
-import { Api } from '../../chat-services/api';
+import { getChatsByReceiver } from '../../services/chat-services/fn/chats/get-chats-by-receiver';
+import { getAllMessages } from '../../services/chat-services/fn/message/get-all-messages';
+import { saveMessage } from '../../services/chat-services/fn/message/save-message';
+import { setMessageToSeen } from '../../services/chat-services/fn/message/set-message-to-seen';
+import { uploadMedia as uploadMediaApi } from '../../services/chat-services/fn/message/upload-media';
+import { Api } from '../../services/chat-services/api';
 import { ChatListComponent } from '../../components/chat-list/chat-list.component';
+import { MessageRequest, MessageResponse, NotificationDto } from '../../services/chat-services/models';
 
 @Component({
   selector: 'app-main',
@@ -25,8 +24,8 @@ import { ChatListComponent } from '../../components/chat-list/chat-list.componen
     FormsModule,
     ChatListComponent
   ],
-  templateUrl: './main.component.html',
-  styleUrls: ['./main.component.scss']
+  templateUrl: './chat.component.html',
+  styleUrls: ['./chat.component.scss']
 })
 export class MainComponent implements OnInit, OnDestroy, AfterViewChecked {
 
@@ -189,7 +188,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewChecked {
         () => {
           this.notificationSubscription = this.socketClient.subscribe(subUrl,
             (message: any) => {
-              const notification: Notification = JSON.parse(message.body);
+              const notification: NotificationDto = JSON.parse(message.body);
               this.handleNotification(notification);
 
             },
@@ -200,7 +199,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-  private handleNotification(notification: Notification) {
+  private handleNotification(notification: NotificationDto) {
     console.log(notification);
     if (!notification) return;
     if (this.selectedChat && this.selectedChat.id === notification.chatId) {

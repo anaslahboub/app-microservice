@@ -5,19 +5,19 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpContext, HttpResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { ApiConfiguration } from '../group-services/api-configuration';
-import { StrictHttpResponse } from '../group-services/strict-http-response';
-import { Api } from '../group-services/api';
+import { ApiConfiguration } from './group-services/api-configuration';
+import { StrictHttpResponse } from './group-services/strict-http-response';
+import { Api } from './group-services/api';
 
 // Import notification functions
-import { deleteNotification, getUserNotifications } from '../group-services/functions';
-import { getUnreadUserNotifications } from '../group-services/functions';
-import { getUnreadNotificationCount } from '../group-services/functions';
-import { markAsRead } from '../group-services/functions';
-import { markAllAsRead } from '../group-services/functions';
+import { deleteNotification, getUserNotifications } from './group-services/functions';
+import { getUnreadUserNotifications } from './group-services/functions';
+import { getUnreadNotificationCount } from './group-services/functions';
+import { markAsRead } from './group-services/functions';
+import { markAllAsRead } from './group-services/functions';
 
 // Import DTOs
-import { NotificationDto } from '../group-services/models/notification-dto';
+import { NotificationDto } from './group-services/models/notification-dto';
 
 /**
  * Service to handle notifications from group-service only

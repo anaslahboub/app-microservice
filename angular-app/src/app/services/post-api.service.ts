@@ -1,31 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { ApiConfiguration } from '../post-services/api-configuration';
-import { Post, CreatePostRequest, PagedModelPost, Comment } from '../post-services/models';
-import { PagedModelCommentResponse } from '../post-services/models/paged-model-comment-response';
-import { CommentResponse } from '../post-services/models/comment-response';
-import { LikeResponse } from '../post-services/models/like-response';
-import { BookmarkResult } from '../post-services/models/bookmark-result';
+import { ApiConfiguration } from './post-services/api-configuration';
+import { Post, CreatePostRequest, PagedModelPost, Comment } from './post-services/models';
+import { PagedModelCommentResponse } from './post-services/models/paged-model-comment-response';
+import { CommentResponse } from './post-services/models/comment-response';
+import { LikeResponse } from './post-services/models/like-response';
+import { BookmarkResult } from './post-services/models/bookmark-result';
 
 // Import the generated API functions that are currently available
-import { createPost } from '../post-services/fn/post/create-post';
-import { getAllPosts } from '../post-services/fn/post/get-all-posts';
-import { getMyPosts } from '../post-services/fn/post/get-my-posts';
-import { getMyPendingPosts } from '../post-services/fn/post/get-my-pending-posts';
-import { deletePost } from '../post-services/fn/post/delete-post';
-import { searchPosts } from '../post-services/fn/post/search-posts';
-import { getTrendingPosts } from '../post-services/fn/post/get-trending-posts';
-import { getBookmarkedPosts } from '../post-services/fn/post/get-bookmarked-posts';
-import { toggleLike } from '../post-services/fn/post/toggle-like';
-import { toggleBookmark } from '../post-services/fn/post/toggle-bookmark';
-import { addComment } from '../post-services/fn/post/add-comment';
-import { pinPost } from '../post-services/fn/post/pin-post';
-import { updatePostStatus } from '../post-services/fn/post/update-post-status';
-import { getCommentsPaginated } from '../post-services/fn/post/get-comments-paginated';
-import { getCommentsWithReplies } from '../post-services/fn/post/get-comments-with-replies';
-import { isPostBookmarkedByUser } from '../post-services/fn/post/is-post-bookmarked-by-user';
-import { isPostLikedByUser } from '../post-services/fn/post/is-post-liked-by-user';
+import { createPost } from './post-services/fn/post/create-post';
+import { getAllPosts } from './post-services/fn/post/get-all-posts';
+import { getMyPosts } from './post-services/fn/post/get-my-posts';
+import { getMyPendingPosts } from './post-services/fn/post/get-my-pending-posts';
+import { deletePost } from './post-services/fn/post/delete-post';
+import { searchPosts } from './post-services/fn/post/search-posts';
+import { getTrendingPosts } from './post-services/fn/post/get-trending-posts';
+import { getBookmarkedPosts } from './post-services/fn/post/get-bookmarked-posts';
+import { toggleLike } from './post-services/fn/post/toggle-like';
+import { toggleBookmark } from './post-services/fn/post/toggle-bookmark';
+import { addComment } from './post-services/fn/post/add-comment';
+import { pinPost } from './post-services/fn/post/pin-post';
+import { updatePostStatus } from './post-services/fn/post/update-post-status';
+import { getCommentsPaginated } from './post-services/fn/post/get-comments-paginated';
+import { getCommentsWithReplies } from './post-services/fn/post/get-comments-with-replies';
+import { isPostBookmarkedByUser } from './post-services/fn/post/is-post-bookmarked-by-user';
+import { isPostLikedByUser } from './post-services/fn/post/is-post-liked-by-user';
 
 @Injectable({
   providedIn: 'root'
@@ -155,7 +155,7 @@ export class PostApiService {
   /**
    * Toggles like on a post
    * @param postId - Post ID
-   * @returns Like object
+   * @returns Like response with action performed and updated count
    */
   async toggleLike(postId: number): Promise<LikeResponse> {
     const response = await firstValueFrom(
@@ -167,7 +167,7 @@ export class PostApiService {
   /**
    * Toggles bookmark on a post
    * @param postId - Post ID
-   * @returns Bookmark object
+   * @returns Bookmark response with action performed and updated count
    */
   async toggleBookmark(postId: number): Promise<BookmarkResult> {
     const response = await firstValueFrom(

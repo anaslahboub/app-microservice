@@ -2,20 +2,23 @@
   <div class="d-flex justify-content-between align-items-center gap-2 p-2">
     <h4>Posts</h4>
     <div class="d-flex gap-2">
-      <button class="btn btn-sm btn-outline-primary" (click)="loadAllPosts()">All</button>
-      <button class="btn btn-sm btn-outline-primary" (click)="loadMyPosts()">My Posts</button>
-      <button class="btn btn-sm btn-outline-primary" (click)="loadMyPendingPosts()">Pending</button>
-      <button class="btn btn-sm btn-outline-secondary" (click)="loadTrendingPosts()">Trending</button>
-      <button class="btn btn-sm btn-outline-success" (click)="loadBookmarkedPosts()">Bookmarks</button>
+      <button class="btn btn-sm" 
+              [class.btn-primary]="currentView === 'ALL'" 
+              [class.btn-outline-primary]="currentView !== 'ALL'"
+              (click)="setView('ALL')">All</button>
+      <button class="btn btn-sm" 
+              [class.btn-primary]="currentView === 'MY_POSTS'" 
+              [class.btn-outline-primary]="currentView !== 'MY_POSTS'"
+              (click)="setView('MY_POSTS')">My Posts</button>
+      <button class="btn btn-sm" 
+              [class.btn-primary]="currentView === 'BOOKMARKED'" 
+              [class.btn-outline-success]="currentView !== 'BOOKMARKED'"
+              (click)="setView('BOOKMARKED')">Bookmarks</button>
+      <button class="btn btn-sm" 
+              [class.btn-primary]="currentView === 'TRENDING'" 
+              [class.btn-outline-secondary]="currentView !== 'TRENDING'"
+              (click)="setView('TRENDING')">Trending</button>
     </div>
-  </div>
-  
-  <!-- Post Status Filter -->
-  <div class="d-flex flex-wrap gap-2 p-2">
-    <button class="btn btn-sm" [class.btn-primary]="postStatusFilter === 'ALL'" [class.btn-outline-primary]="postStatusFilter !== 'ALL'" (click)="setPostStatusFilter('ALL')">All</button>
-    <button class="btn btn-sm" [class.btn-warning]="postStatusFilter === 'PENDING'" [class.btn-outline-warning]="postStatusFilter !== 'PENDING'" (click)="setPostStatusFilter('PENDING')">Pending</button>
-    <button class="btn btn-sm" [class.btn-success]="postStatusFilter === 'APPROVED'" [class.btn-outline-success]="postStatusFilter !== 'APPROVED'" (click)="setPostStatusFilter('APPROVED')">Approved</button>
-    <button class="btn btn-sm" [class.btn-danger]="postStatusFilter === 'REJECTED'" [class.btn-outline-danger]="postStatusFilter !== 'REJECTED'" (click)="setPostStatusFilter('REJECTED')">Rejected</button>
   </div>
   
   <div class="d-flex flex-column gap-1 p-2">
@@ -31,11 +34,13 @@
 
 <div class="post-list mt-3">
   <!-- Loading indicator -->
-  <div *ngIf="isLoadingPosts" class="text-center p-3">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
+  @if (isLoadingPosts) {
+    <div class="text-center p-3">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Post creation form -->
   <div class="card mb-3">
@@ -61,154 +66,190 @@
           class="btn btn-primary btn-sm" 
           (click)="sendPost()" 
           [disabled]="isSendingPost || (!newPostContent.trim() && !selectedFile)">
-          <span *ngIf="isSendingPost" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          @if (isSendingPost) {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          }
           Post
         </button>
       </div>
       <!-- Preview of selected image -->
-      <div *ngIf="selectedFilePreview" class="mt-2">
-        <div class="d-flex align-items-center bg-light p-2 rounded">
-          <img [src]="selectedFilePreview" alt="Selected image" class="img-thumbnail me-2" style="max-height: 50px; max-width: 50px;">
-          <span class="text-truncate flex-grow-1">{{ selectedFileName }}</span>
-          <button class="btn btn-sm btn-outline-danger" (click)="removeSelectedFile()">
-            <i class="fas fa-times"></i>
-          </button>
+      @if (selectedFilePreview) {
+        <div class="mt-2">
+          <div class="d-flex align-items-center bg-light p-2 rounded">
+            <img [src]="selectedFilePreview" alt="Selected image" class="img-thumbnail me-2" style="max-height: 50px; max-width: 50px;">
+            <span class="text-truncate flex-grow-1">{{ selectedFileName }}</span>
+            <button class="btn btn-sm btn-outline-danger" (click)="removeSelectedFile()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         </div>
-      </div>
+      }
     </div>
   </div>
 
   <!-- Posts list -->
-  <div *ngIf="!isLoadingPosts && posts.length > 0">
-    <div *ngFor="let post of posts; trackBy: trackById" class="card mb-3">
-      <div class="card-body">
-        <div class="d-flex justify-content-between">
-          <div class="d-flex align-items-center">
-            <div class="user-img me-2">
-              <img src="user.png" alt="User" class="rounded-circle" width="40" height="40">
-            </div>
-            <div>
-              <h6 class="mb-0">{{ post.authorId || 'Unknown User' }}</h6>
-              <small class="text-muted">{{ formatDate(post.createdDate) }}</small>
-              <!-- Post status badge -->
-              <span class="badge ms-2" 
-                [class.bg-warning]="post.status === 'PENDING'" 
-                [class.bg-success]="post.status === 'APPROVED'" 
-                [class.bg-danger]="post.status === 'REJECTED'">
-                {{ post.status || 'UNKNOWN' }}
-              </span>
-            </div>
-          </div>
-          <div class="dropdown">
-            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
-              <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#" (click)="pinPost(post.id!, !post.pinned)"><i class="fas fa-thumbtack me-2"></i>{{ post.pinned ? 'Unpin' : 'Pin' }}</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#" (click)="updatePostStatus(post.id!, 'APPROVED')"><i class="fas fa-check me-2 text-success"></i>Approve</a></li>
-              <li><a class="dropdown-item" href="#" (click)="updatePostStatus(post.id!, 'REJECTED')"><i class="fas fa-times me-2 text-danger"></i>Reject</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#" (click)="deletePost(post.id!)"><i class="fas fa-trash me-2"></i>Delete</a></li>
-            </ul>
-          </div>
-        </div>
-        
-        <div class="mt-3">
-          <p class="card-text">{{ post.content }}</p>
-          <div *ngIf="post.imageUrl" class="text-center">
-            <img [src]="getFullImageUrl(post.imageUrl)" alt="Post image" class="img-fluid rounded">
-          </div>
-        </div>
-        
-        <!-- Comments section -->
-        <div class="mt-3">
-          <div class="input-group mb-2">
-            <input type="text" class="form-control" placeholder="Write a comment..." [(ngModel)]="newComments[post.id!]" (keyup.enter)="addComment(post.id!)">
-            <button class="btn btn-outline-primary" type="button" (click)="addComment(post.id!)">Post</button>
-          </div>
-          
-          <!-- Display comments -->
-          <div *ngIf="comments[post.id!] && comments[post.id!].length > 0" class="mt-2">
-            <div *ngFor="let comment of comments[post.id!]; let i = index" class="border-bottom pb-2 mb-2">
-              <div class="d-flex">
-                <div class="flex-grow-1">
-                  <div class="d-flex justify-content-between">
-                    <strong>{{ comment.authorId || 'Anonymous' }}</strong>
-                    <small class="text-muted">{{ formatDate(comment.createdDate) }}</small>
-                  </div>
-                  <p class="mb-1">{{ comment.content }}</p>
+  @if (!isLoadingPosts && displayedPosts.length > 0) {
+    <div>
+      @for (post of displayedPosts; track post.id) {
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div class="d-flex align-items-center">
+                <div class="user-img me-2">
+                  <img src="user.png" alt="User" class="rounded-circle" width="40" height="40">
+                </div>
+                <div>
+                  <h6 class="mb-0">{{ post.authorId || 'Unknown User' }}</h6>
+                  <small class="text-muted">{{ formatDate(post.createdDate) }}</small>
+                  <!-- Post status badge -->
+                  <span class="badge ms-2" 
+                    [class.bg-warning]="post.status === 'PENDING'" 
+                    [class.bg-success]="post.status === 'APPROVED'" 
+                    [class.bg-danger]="post.status === 'REJECTED'">
+                    {{ post.status || 'UNKNOWN' }}
+                  </span>
                 </div>
               </div>
-              
-              <!-- Replies -->
-              <div *ngIf="comment.replies && comment.replies.length > 0" class="ms-4 mt-2">
-                <div *ngFor="let reply of comment.replies" class="border-bottom pb-1 mb-1">
-                  <div class="d-flex justify-content-between">
-                    <strong>{{ reply.authorId || 'Anonymous' }}</strong>
-                    <small class="text-muted">{{ formatDate(reply.createdDate) }}</small>
-                  </div>
-                  <p class="mb-1">{{ reply.content }}</p>
-                </div>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                  <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#" (click)="pinPost(post.id!, !post.pinned)"><i class="fas fa-thumbtack me-2"></i>{{ post.pinned ? 'Unpin' : 'Pin' }}</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="#" (click)="updatePostStatus(post.id!, 'APPROVED')"><i class="fas fa-check me-2 text-success"></i>Approve</a></li>
+                  <li><a class="dropdown-item" href="#" (click)="updatePostStatus(post.id!, 'REJECTED')"><i class="fas fa-times me-2 text-danger"></i>Reject</a></li>
+                  <!-- Simplified delete button test -->
+                  <li *ngIf="currentView === 'MY_POSTS'"><hr class="dropdown-divider"></li>
+                  <li *ngIf="currentView === 'MY_POSTS'">
+                    <a class="dropdown-item" href="#" (click)="deletePost(post.id!)">
+                      <i class="fas fa-trash me-2"></i>Delete Post
+                    </a>
+                  </li>
+                </ul>
               </div>
-              
-              <!-- Load replies button -->
-              <button *ngIf="!comment.replies || comment.replies.length === 0" class="btn btn-sm btn-link p-0" (click)="loadCommentsWithReplies(post.id!)">
-                Load replies
-              </button>
             </div>
             
-            <!-- Load more comments button -->
-            <button class="btn btn-sm btn-outline-primary" (click)="loadCommentsPaginated(post.id!)">
-              Load more comments
-            </button>
+            <div class="mt-3">
+              <p class="card-text">{{ post.content }}</p>
+              <div *ngIf="post.imageUrl" class="text-center">
+                <img [src]="getFullImageUrl(post.imageUrl)" alt="Post image" class="img-fluid rounded">
+              </div>
+              
+              <!-- Test delete button outside dropdown -->
+              <div *ngIf="currentView === 'MY_POSTS'" class="mt-2">
+                <button class="btn btn-danger btn-sm" (click)="deletePost(post.id!)">
+                  <i class="fas fa-trash me-1"></i>Delete Post (Test)
+                </button>
+              </div>
+            </div>
+            
+            <!-- Comments section -->
+            <div class="mt-3">
+              <div class="input-group mb-2">
+                <input type="text" class="form-control" placeholder="Write a comment..." [(ngModel)]="newComments[post.id!]" (keyup.enter)="addComment(post.id!)">
+                <button class="btn btn-outline-primary" type="button" (click)="addComment(post.id!)">Post</button>
+              </div>
+              
+              <!-- Display comments -->
+              @if (comments[post.id!] && comments[post.id!].length > 0) {
+                <div class="mt-2">
+                  @for (comment of comments[post.id!]; track comment.id; let i = $index) {
+                    <div class="border-bottom pb-2 mb-2">
+                      <div class="d-flex">
+                        <div class="flex-grow-1">
+                          <div class="d-flex justify-content-between">
+                            <strong>{{ comment.authorId || 'Anonymous' }}</strong>
+                            <small class="text-muted">{{ formatDate(comment.createdDate) }}</small>
+                          </div>
+                          <p class="mb-1">{{ comment.content }}</p>
+                        </div>
+                      </div>
+                      
+                      <!-- Replies -->
+                      @if (comment.replies && comment.replies.length > 0) {
+                        <div class="ms-4 mt-2">
+                          @for (reply of comment.replies; track reply.id) {
+                            <div class="border-bottom pb-1 mb-1">
+                              <div class="d-flex justify-content-between">
+                                <strong>{{ reply.authorId || 'Anonymous' }}</strong>
+                                <small class="text-muted">{{ formatDate(reply.createdDate) }}</small>
+                              </div>
+                              <p class="mb-1">{{ reply.content }}</p>
+                            </div>
+                          }
+                        </div>
+                      }
+                      
+                      <!-- Load replies button -->
+                      @if (comment.replies && comment.replies.length === 0) {
+                        <button class="btn btn-sm btn-link p-0" (click)="showReplies(post.id!, comment.id!)">
+                          Load replies
+                        </button>
+                      }
+                    </div>
+                  }
+                  
+                  <!-- Load more comments button -->
+                  <button class="btn btn-sm btn-outline-primary" (click)="loadCommentsPaginated(post.id!)">
+                    Load more comments
+                  </button>
+                </div>
+              }
+            </div>
+            
+            <div class="d-flex justify-content-between mt-3">
+              <div class="d-flex gap-3">
+                <button class="btn btn-light btn-sm d-flex align-items-center" (click)="toggleLike(post.id!)">
+                  <i class="fas fa-heart me-1" [class.text-danger]="isPostLiked(post.id!)"></i>
+                  <span>{{ post.likeCount || 0 }}</span>
+                </button>
+                <button class="btn btn-light btn-sm d-flex align-items-center" (click)="toggleComments(post.id!)">
+                  <i class="fas fa-comment me-1"></i>
+                  <span>{{ post.commentCount || 0 }}</span>
+                </button>
+                <button class="btn btn-light btn-sm d-flex align-items-center" (click)="toggleBookmark(post.id!)">
+                  <i class="fas fa-bookmark me-1" [class.text-primary]="isPostBookmarked(post.id!)"></i>
+                  <span>{{ post.bookmarkCount || 0 }}</span>
+                </button>
+              </div>
+              <button class="btn btn-light btn-sm">
+                <i class="fas fa-share-alt"></i>
+              </button>
+            </div>
           </div>
         </div>
-        
-        <div class="d-flex justify-content-between mt-3">
-          <div class="d-flex gap-3">
-            <button class="btn btn-light btn-sm d-flex align-items-center" (click)="toggleLike(post.id!)">
-              <i class="fas fa-heart me-1" [class.text-danger]="checkIfPostLiked(post.id!)"></i>
-              <span>{{ post.likeCount || 0 }}</span>
-            </button>
-            <button class="btn btn-light btn-sm d-flex align-items-center">
-              <i class="fas fa-comment me-1"></i>
-              <span>{{ post.commentCount || 0 }}</span>
-            </button>
-            <button class="btn btn-light btn-sm d-flex align-items-center" (click)="toggleBookmark(post.id!)">
-              <i class="fas fa-bookmark me-1" [class.text-primary]="checkIfPostBookmarked(post.id!)"></i>
-              <span>{{ post.bookmarkCount || 0 }}</span>
-            </button>
-          </div>
-          <button class="btn btn-light btn-sm">
-            <i class="fas fa-share-alt"></i>
-          </button>
-        </div>
-      </div>
+      }
     </div>
-  </div>
+  }
   
   <!-- Empty state -->
-  <div *ngIf="!isLoadingPosts && posts.length === 0" class="text-center py-5">
-    <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
-    <h5>No posts yet</h5>
-    <p class="text-muted">Be the first to share something!</p>
-  </div>
+  @if (!isLoadingPosts && displayedPosts.length === 0) {
+    <div class="text-center py-5">
+      <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+      <h5>No posts yet</h5>
+      <p class="text-muted">Be the first to share something!</p>
+    </div>
+  }
   
   <!-- Pagination -->
-  <div *ngIf="!isLoadingPosts && posts.length > 0 && totalPages > 1" class="d-flex justify-content-center mt-4">
-    <nav>
-      <ul class="pagination">
-        <li class="page-item" [class.disabled]="currentPage === 0">
-          <a class="page-link" (click)="currentPage = currentPage - 1; loadAllPosts()" tabindex="-1">Previous</a>
-        </li>
-        <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index" [class.active]="i === currentPage">
-          <a class="page-link" (click)="currentPage = i;  loadAllPosts()">{{ i + 1 }}</a>
-        </li>
-        <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
-          <a class="page-link" (click)="currentPage = currentPage + 1; loadAllPosts()">Next</a>
-        </li>
-      </ul>
-    </nav>
-  </div>
+  @if (!isLoadingPosts && displayedPosts.length > 0 && totalPages > 1) {
+    <div class="d-flex justify-content-center mt-4">
+      <nav>
+        <ul class="pagination">
+          <li class="page-item" [class.disabled]="currentPage === 0">
+            <a class="page-link" (click)="previousPage()" tabindex="-1">Previous</a>
+          </li>
+          @for (page of [].constructor(totalPages); track $index; let i = $index) {
+            <li class="page-item" [class.active]="i === currentPage">
+              <a class="page-link" (click)="goToPage(i)">{{ i + 1 }}</a>
+            </li>
+          }
+          <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+            <a class="page-link" (click)="nextPage()">Next</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  }
 </div>

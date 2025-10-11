@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { ForbiddenComponent } from './utils/keycloak/ForbiddenComponent';
-import { MainComponent } from './pages/main/main.component';
+import { MainComponent } from './pages/chat/chat.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { GroupsComponent } from './pages/groups/groups.component';
