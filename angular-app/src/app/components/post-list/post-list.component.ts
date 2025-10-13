@@ -882,7 +882,7 @@ export class PostListComponent implements OnInit {
     }
     
     // If it's a relative URL, prepend the post-service base URL
-    const postServiceBaseUrl = 'http://localhost:8083';
+    const postServiceBaseUrl = 'http://localhost:7777/POST-SERVICE';
     return postServiceBaseUrl + imageUrl;
   }
   
