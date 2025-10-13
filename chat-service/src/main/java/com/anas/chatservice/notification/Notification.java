@@ -8,13 +8,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "notifications")
-public class Notification extends BaseAuditingEntity {
+public class Notification extends BaseAuditingEntity implements Serializable  {
 
     @Id
     @SequenceGenerator(name = "notification_seq", sequenceName = "notification_seq", allocationSize = 1)

@@ -2,6 +2,7 @@ package com.anas.chatservice.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ public class UserSynchronizer {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-
+    @CacheEvict(value = {"users", "users:id"}, allEntries = true)
     public void synchronizeWithIdp(Jwt token) {
         log.info("Synchronizing user with idp");
         getUserEmail(token).ifPresent(userEmail -> {

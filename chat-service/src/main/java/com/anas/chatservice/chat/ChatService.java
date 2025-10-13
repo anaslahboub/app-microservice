@@ -5,6 +5,9 @@ import com.anas.chatservice.user.User;
 import com.anas.chatservice.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ public class ChatService {
     private final ChatMapper mapper;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "chats",key="#currentUser.name")
     public List<ChatResponse> getChatsByReceiverId(Authentication currentUser) {
         final String userId = currentUser.getName();
         return chatRepository.findChatsBySenderId(userId)
@@ -28,7 +32,12 @@ public class ChatService {
                 .map(c -> mapper.toChatResponse(c, userId))
                 .toList();
     }
+    @Caching(evict = {
+            @CacheEvict(value = "chats",key = "senderId"),
+            @CacheEvict(value = "chats",key = "receiverId")
 
+
+    })
     public String createChat(String senderId, String receiverId) {
 
         Optional<Chat> existingChat = chatRepository.findChatByReceiverAndSender(senderId, receiverId);

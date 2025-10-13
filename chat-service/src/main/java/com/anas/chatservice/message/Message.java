@@ -20,6 +20,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -32,7 +34,7 @@ import lombok.Setter;
 @NamedQuery(name = MessageConstants.SET_MESSAGES_TO_SEEN_BY_CHAT,
         query = "UPDATE Message SET state = :newState WHERE chat.id = :chatId"
 )
-public class Message extends BaseAuditingEntity {
+public class Message extends BaseAuditingEntity implements Serializable {
 
     @Id
     @SequenceGenerator(name = "msg_seq", sequenceName = "msg_seq", allocationSize = 1)

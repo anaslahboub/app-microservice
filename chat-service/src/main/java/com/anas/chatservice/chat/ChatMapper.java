@@ -2,8 +2,10 @@ package com.anas.chatservice.chat;
 
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
+
 @Service
-public class ChatMapper {
+public class ChatMapper implements Serializable {
     public ChatResponse toChatResponse(Chat chat, String senderId) {
         return ChatResponse.builder()
                 .id(chat.getId())

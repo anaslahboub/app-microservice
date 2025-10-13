@@ -9,6 +9,8 @@ import com.anas.chatservice.notification.NotificationService;
 import com.anas.chatservice.notification.NotificationType;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ public class MessageService {
     private final NotificationService notificationService;
     private final FileService fileService;
 
+    @CacheEvict(value = "messages",key ="#messageRequest.chatId")
     public void saveMessage(MessageRequest messageRequest) {
         Chat chat = chatRepository.findById(messageRequest.getChatId())
                 .orElseThrow(() -> new EntityNotFoundException("Chat not found"));
@@ -53,6 +56,7 @@ public class MessageService {
         notificationService.createAndSendNotification(messageRequest.getReceiverId(), notification);
     }
 
+    @Cacheable(value = "messages",key = "#chatId")
     public List<MessageResponse> findChatMessages(String chatId) {
         return messageRepository.findMessagesByChatId(chatId)
                 .stream()
@@ -61,6 +65,7 @@ public class MessageService {
     }
 
     @Transactional
+    @CacheEvict(value = "messages", key = "#chatId")
     public void setMessagesToSeen(String chatId, Authentication authentication) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
@@ -77,7 +82,7 @@ public class MessageService {
 
         notificationService.createAndSendNotification(recipientId, notification);
     }
-
+    @CacheEvict(value = "messages",key = "#chatId")
     public void uploadMediaMessage(String chatId, MultipartFile file, Authentication authentication) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new RuntimeException("Chat not found"));

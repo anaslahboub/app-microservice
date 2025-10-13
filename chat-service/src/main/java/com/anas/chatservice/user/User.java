@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,7 +30,7 @@ import java.util.List;
             query = "SELECT u FROM User u WHERE u.id != :publicId")
 @NamedQuery(name = UserConstants.FIND_USER_BY_PUBLIC_ID,
             query = "SELECT u FROM User u WHERE u.id = :publicId")
-public class User extends BaseAuditingEntity {
+public class User extends BaseAuditingEntity implements Serializable {
 
     private static final int LAST_ACTIVATE_INTERVAL = 5;
 

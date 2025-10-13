@@ -3,6 +3,9 @@ package com.anas.chatservice.notification;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +23,10 @@ public class NotificationService {
     private final NotificationMapper notificationMapper;
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "notifications:user", key = "#userId"),
+            @CacheEvict(value = "notifications:user:unread", key = "#userId")
+    })
     public NotificationDTO createAndSendNotification(String userId, Notification notification) {
         // Persist notification
         Notification savedNotification = notificationRepository.save(notification);
@@ -50,13 +57,14 @@ public class NotificationService {
         
         return notificationMapper.toDTO(savedNotification);
     }
-
+    @Cacheable(value = "notifications:user", key = "#userId")
     public List<NotificationDTO> getUserNotifications(String userId) {
         return notificationRepository.findByReceiverIdOrderByCreatedDateDesc(userId)
                 .stream()
                 .map(notificationMapper::toDTO)
                 .toList();
     }
+    @Cacheable(value = "notifications:user:unread", key = "#userId")
 
     public List<NotificationDTO> getUnreadUserNotifications(String userId) {
         return notificationRepository.findByReceiverIdAndIsReadOrderByCreatedDateDesc(userId, false)
@@ -64,6 +72,7 @@ public class NotificationService {
                 .map(notificationMapper::toDTO)
                 .toList();
     }
+    @Cacheable(value = "notifications:chat", key = "#chatId")
 
     public List<NotificationDTO> getChatNotifications(String chatId) {
         return notificationRepository.findByChatIdOrderByCreatedDateDesc(chatId)
@@ -72,16 +81,27 @@ public class NotificationService {
                 .toList();
     }
 
+
+    @Cacheable(value = "notifications:user:count", key = "#userId")
     public Long getUnreadNotificationCount(String userId) {
         return notificationRepository.countUnreadByReceiverId(userId);
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "notifications:user", key = "#userId"),
+            @CacheEvict(value = "notifications:user:unread", key = "#userId")
+    })
+
     public void markAllAsRead(String userId) {
         notificationRepository.markAllAsReadByReceiverId(userId);
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "notifications:user", key = "#notification.receiverId"),
+            @CacheEvict(value = "notifications:user:unread", key = "#notification.receiverId")
+    })
     public void markAsRead(Long notificationId) {
         notificationRepository.findById(notificationId).ifPresent(notification -> {
             notification.setRead(true);
