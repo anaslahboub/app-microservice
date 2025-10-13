@@ -28,4 +28,4 @@ export function deleteGroup(http: HttpClient, rootUrl: string, params: DeleteGro
   );
 }
 
-deleteGroup.PATH = '/api/groups/{id}';
+deleteGroup.PATH = '/api/v1/groups/{id}';

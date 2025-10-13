@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/groups/{groupId}/posts")
+@RequestMapping("/api/v1/groups/{groupId}/posts")
 @RequiredArgsConstructor
 public class GroupPostController {
 

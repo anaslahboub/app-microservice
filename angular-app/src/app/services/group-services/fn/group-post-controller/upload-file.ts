@@ -36,4 +36,4 @@ export function uploadFile(http: HttpClient, rootUrl: string, params: UploadFile
   );
 }
 
-uploadFile.PATH = '/api/groups/{groupId}/posts/upload';
+uploadFile.PATH = '/api/v1/groups/{groupId}/posts/upload';

@@ -30,4 +30,4 @@ export function getDebugInfo(http: HttpClient, rootUrl: string, params?: GetDebu
   );
 }
 
-getDebugInfo.PATH = '/api/v1/files/debug/info';
+getDebugInfo.PATH = '/api/v1/post/files/debug/info';

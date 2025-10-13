@@ -27,4 +27,4 @@ export function getUnreadUserNotifications(http: HttpClient, rootUrl: string, pa
   );
 }
 
-getUnreadUserNotifications.PATH = '/api/notifications/unread';
+getUnreadUserNotifications.PATH = '/api/v1/groups/notifications/unread';

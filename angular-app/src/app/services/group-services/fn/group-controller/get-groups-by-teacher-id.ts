@@ -29,4 +29,4 @@ export function getGroupsByTeacherId(http: HttpClient, rootUrl: string, params: 
   );
 }
 
-getGroupsByTeacherId.PATH = '/api/groups/teacher/{teacherId}';
+getGroupsByTeacherId.PATH = '/api/v1/groups/teacher/{teacherId}';

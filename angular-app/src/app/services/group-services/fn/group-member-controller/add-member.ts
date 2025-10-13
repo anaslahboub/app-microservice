@@ -32,4 +32,4 @@ export function addMember(http: HttpClient, rootUrl: string, params: AddMember$P
   );
 }
 
-addMember.PATH = '/api/groups/{groupId}/members';
+addMember.PATH = '/api/v1/groups/{groupId}/members';

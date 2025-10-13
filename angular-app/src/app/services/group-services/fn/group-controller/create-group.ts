@@ -30,4 +30,4 @@ export function createGroup(http: HttpClient, rootUrl: string, params: CreateGro
   );
 }
 
-createGroup.PATH = '/api/groups';
+createGroup.PATH = '/api/v1/groups';

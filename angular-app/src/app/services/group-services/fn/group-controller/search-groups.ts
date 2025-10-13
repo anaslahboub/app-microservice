@@ -30,4 +30,4 @@ export function searchGroups(http: HttpClient, rootUrl: string, params: SearchGr
   );
 }
 
-searchGroups.PATH = '/api/groups/search';
+searchGroups.PATH = '/api/v1/groups/search';

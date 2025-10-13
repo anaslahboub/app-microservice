@@ -29,4 +29,4 @@ export function getPublishedPosts(http: HttpClient, rootUrl: string, params: Get
   );
 }
 
-getPublishedPosts.PATH = '/api/groups/{groupId}/posts';
+getPublishedPosts.PATH = '/api/v1/groups/{groupId}/posts';

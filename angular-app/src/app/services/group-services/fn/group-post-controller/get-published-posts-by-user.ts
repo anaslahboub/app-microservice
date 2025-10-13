@@ -31,4 +31,4 @@ export function getPublishedPostsByUser(http: HttpClient, rootUrl: string, param
   );
 }
 
-getPublishedPostsByUser.PATH = '/api/groups/{groupId}/posts/user/{userId}';
+getPublishedPostsByUser.PATH = '/api/v1/groups/{groupId}/posts/user/{userId}';

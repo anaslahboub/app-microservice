@@ -31,4 +31,4 @@ export function designateCoAdmin(http: HttpClient, rootUrl: string, params: Desi
   );
 }
 
-designateCoAdmin.PATH = '/api/groups/{groupId}/members/{userId}/co-admin';
+designateCoAdmin.PATH = '/api/v1/groups/{groupId}/members/{userId}/co-admin';

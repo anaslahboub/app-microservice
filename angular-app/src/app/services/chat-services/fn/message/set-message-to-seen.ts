@@ -28,4 +28,4 @@ export function setMessageToSeen(http: HttpClient, rootUrl: string, params: SetM
   );
 }
 
-setMessageToSeen.PATH = '/api/v1/messages';
+setMessageToSeen.PATH = '/api/v1/chats/messages';

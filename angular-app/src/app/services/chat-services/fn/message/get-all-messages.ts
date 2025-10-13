@@ -29,4 +29,4 @@ export function getAllMessages(http: HttpClient, rootUrl: string, params: GetAll
   );
 }
 
-getAllMessages.PATH = '/api/v1/messages/chat/{chat-id}';
+getAllMessages.PATH = '/api/v1/chats/messages/chat/{chat-id}';

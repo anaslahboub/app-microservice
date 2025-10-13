@@ -30,4 +30,4 @@ export function leaveGroup(http: HttpClient, rootUrl: string, params: LeaveGroup
   );
 }
 
-leaveGroup.PATH = '/api/groups/{groupId}/members/{userId}/leave';
+leaveGroup.PATH = '/api/v1/groups/{groupId}/members/{userId}/leave';

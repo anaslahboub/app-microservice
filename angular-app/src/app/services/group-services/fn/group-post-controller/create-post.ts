@@ -31,4 +31,4 @@ export function createPost(http: HttpClient, rootUrl: string, params: CreatePost
   );
 }
 
-createPost.PATH = '/api/groups/{groupId}/posts';
+createPost.PATH = '/api/v1/groups/{groupId}/posts';

@@ -27,4 +27,4 @@ export function getUserNotifications(http: HttpClient, rootUrl: string, params?:
   );
 }
 
-getUserNotifications.PATH = '/api/notifications';
+getUserNotifications.PATH = '/api/v1/groups/notifications';

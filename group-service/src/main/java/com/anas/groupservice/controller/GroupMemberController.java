@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/groups/{groupId}/members")
+@RequestMapping("/api/v1/groups/{groupId}/members")
 @RequiredArgsConstructor
 public class GroupMemberController {
 

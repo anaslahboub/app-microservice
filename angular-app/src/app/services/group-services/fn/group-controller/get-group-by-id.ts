@@ -29,4 +29,4 @@ export function getGroupById(http: HttpClient, rootUrl: string, params: GetGroup
   );
 }
 
-getGroupById.PATH = '/api/groups/{id}';
+getGroupById.PATH = '/api/v1/groups/{id}';

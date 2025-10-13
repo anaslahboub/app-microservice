@@ -29,4 +29,4 @@ export function saveMessage(http: HttpClient, rootUrl: string, params: SaveMessa
   );
 }
 
-saveMessage.PATH = '/api/v1/messages';
+saveMessage.PATH = '/api/v1/chats/messages';

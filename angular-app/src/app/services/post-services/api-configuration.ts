@@ -10,7 +10,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ApiConfiguration {
-  rootUrl: string = 'http://localhost:7777/POST-SERVICE';
+  rootUrl: string = 'http://localhost:7777';
 }
 
 /**

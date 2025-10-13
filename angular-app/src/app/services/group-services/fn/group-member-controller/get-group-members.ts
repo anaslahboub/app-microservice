@@ -29,4 +29,4 @@ export function getGroupMembers(http: HttpClient, rootUrl: string, params: GetGr
   );
 }
 
-getGroupMembers.PATH = '/api/groups/{groupId}/members';
+getGroupMembers.PATH = '/api/v1/groups/{groupId}/members';

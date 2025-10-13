@@ -30,4 +30,4 @@ export function healthCheck(http: HttpClient, rootUrl: string, params?: HealthCh
   );
 }
 
-healthCheck.PATH = '/api/health';
+healthCheck.PATH = '/api/post/health';

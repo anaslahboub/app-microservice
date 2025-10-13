@@ -21,44 +21,7 @@
     }
   ],
   "paths": {
-    "/api/notifications/{notificationId}/read": {
-      "put": {
-        "tags": [
-          "notification-controller"
-        ],
-        "operationId": "markAsRead",
-        "parameters": [
-          {
-            "name": "notificationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/notifications/read-all": {
-      "put": {
-        "tags": [
-          "notification-controller"
-        ],
-        "operationId": "markAllAsRead",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/groups/{id}": {
+    "/api/v1/groups/{id}": {
       "get": {
         "tags": [
           "group-controller"
@@ -150,7 +113,7 @@
         }
       }
     },
-    "/api/groups/{id}/archive": {
+    "/api/v1/groups/{id}/archive": {
       "put": {
         "tags": [
           "group-controller"
@@ -174,7 +137,44 @@
         }
       }
     },
-    "/api/groups": {
+    "/api/v1/groups/notifications/{notificationId}/read": {
+      "put": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "markAsRead",
+        "parameters": [
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/groups/notifications/read-all": {
+      "put": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "markAllAsRead",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/groups": {
       "get": {
         "tags": [
           "group-controller"
@@ -225,7 +225,7 @@
         }
       }
     },
-    "/api/groups/{groupId}/posts": {
+    "/api/v1/groups/{groupId}/posts": {
       "get": {
         "tags": [
           "group-post-controller"
@@ -298,7 +298,7 @@
         }
       }
     },
-    "/api/groups/{groupId}/posts/upload": {
+    "/api/v1/groups/{groupId}/posts/upload": {
       "post": {
         "tags": [
           "group-post-controller"
@@ -355,7 +355,7 @@
         }
       }
     },
-    "/api/groups/{groupId}/members": {
+    "/api/v1/groups/{groupId}/members": {
       "get": {
         "tags": [
           "group-member-controller"
@@ -428,7 +428,7 @@
         }
       }
     },
-    "/api/groups/{groupId}/members/{userId}/leave": {
+    "/api/v1/groups/{groupId}/members/{userId}/leave": {
       "post": {
         "tags": [
           "group-member-controller"
@@ -460,7 +460,7 @@
         }
       }
     },
-    "/api/groups/{groupId}/members/{userId}/co-admin": {
+    "/api/v1/groups/{groupId}/members/{userId}/co-admin": {
       "post": {
         "tags": [
           "group-member-controller"
@@ -499,7 +499,7 @@
         }
       }
     },
-    "/api/groups/search": {
+    "/api/v1/groups/search": {
       "post": {
         "tags": [
           "group-controller"
@@ -532,114 +532,7 @@
         }
       }
     },
-    "/api/statistics/groups": {
-      "get": {
-        "tags": [
-          "statistics-controller"
-        ],
-        "operationId": "getGroupStatistics",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GroupStatisticsDTO"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/statistics/groups/teacher": {
-      "get": {
-        "tags": [
-          "statistics-controller"
-        ],
-        "operationId": "getGroupStatisticsForTeacher",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GroupStatisticsDTO"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/notifications": {
-      "get": {
-        "tags": [
-          "notification-controller"
-        ],
-        "operationId": "getUserNotifications",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NotificationDTO"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/notifications/unread": {
-      "get": {
-        "tags": [
-          "notification-controller"
-        ],
-        "operationId": "getUnreadUserNotifications",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NotificationDTO"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/notifications/count": {
-      "get": {
-        "tags": [
-          "notification-controller"
-        ],
-        "operationId": "getUnreadNotificationCount",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int64"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/groups/{groupId}/posts/{postId}/download": {
+    "/api/v1/groups/{groupId}/posts/{postId}/download": {
       "get": {
         "tags": [
           "group-post-controller"
@@ -680,7 +573,7 @@
         }
       }
     },
-    "/api/groups/{groupId}/posts/user/{userId}": {
+    "/api/v1/groups/{groupId}/posts/user/{userId}": {
       "get": {
         "tags": [
           "group-post-controller"
@@ -722,7 +615,7 @@
         }
       }
     },
-    "/api/groups/{groupId}/members/students": {
+    "/api/v1/groups/{groupId}/members/students": {
       "get": {
         "tags": [
           "group-member-controller"
@@ -756,7 +649,7 @@
         }
       }
     },
-    "/api/groups/user/{userId}": {
+    "/api/v1/groups/user/{userId}": {
       "get": {
         "tags": [
           "group-controller"
@@ -789,7 +682,7 @@
         }
       }
     },
-    "/api/groups/teacher/{teacherId}": {
+    "/api/v1/groups/teacher/{teacherId}": {
       "get": {
         "tags": [
           "group-controller"
@@ -822,31 +715,114 @@
         }
       }
     },
-    "/api/notifications/{notificationId}": {
-      "delete": {
+    "/api/v1/groups/statistics/groups": {
+      "get": {
         "tags": [
-          "notification-controller"
+          "statistics-controller"
         ],
-        "operationId": "deleteNotification",
-        "parameters": [
-          {
-            "name": "notificationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
+        "operationId": "getGroupStatistics",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupStatisticsDTO"
+                }
+              }
+            }
           }
         }
       }
     },
-    "/api/groups/{groupId}/posts/{postId}": {
+    "/api/v1/groups/statistics/groups/teacher": {
+      "get": {
+        "tags": [
+          "statistics-controller"
+        ],
+        "operationId": "getGroupStatisticsForTeacher",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupStatisticsDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/groups/notifications": {
+      "get": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "getUserNotifications",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/groups/notifications/unread": {
+      "get": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "getUnreadUserNotifications",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/groups/notifications/count": {
+      "get": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "getUnreadNotificationCount",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/groups/{groupId}/posts/{postId}": {
       "delete": {
         "tags": [
           "group-post-controller"
@@ -879,7 +855,7 @@
         }
       }
     },
-    "/api/groups/{groupId}/members/{userId}": {
+    "/api/v1/groups/{groupId}/members/{userId}": {
       "delete": {
         "tags": [
           "group-member-controller"
@@ -901,6 +877,30 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/groups/notifications/{notificationId}": {
+      "delete": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "deleteNotification",
+        "parameters": [
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],

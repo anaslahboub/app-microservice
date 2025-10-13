@@ -32,4 +32,4 @@ export function uploadMedia(http: HttpClient, rootUrl: string, params: UploadMed
   );
 }
 
-uploadMedia.PATH = '/api/v1/messages/upload-media';
+uploadMedia.PATH = '/api/v1/chats/messages/upload-media';

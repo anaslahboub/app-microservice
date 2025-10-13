@@ -30,4 +30,4 @@ export function removeMember(http: HttpClient, rootUrl: string, params: RemoveMe
   );
 }
 
-removeMember.PATH = '/api/groups/{groupId}/members/{userId}';
+removeMember.PATH = '/api/v1/groups/{groupId}/members/{userId}';

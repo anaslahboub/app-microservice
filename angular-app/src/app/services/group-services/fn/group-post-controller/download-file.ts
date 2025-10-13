@@ -30,4 +30,4 @@ export function downloadFile(http: HttpClient, rootUrl: string, params: Download
   );
 }
 
-downloadFile.PATH = '/api/groups/{groupId}/posts/{postId}/download';
+downloadFile.PATH = '/api/v1/groups/{groupId}/posts/{postId}/download';

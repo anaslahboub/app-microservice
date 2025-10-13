@@ -26,4 +26,4 @@ export function getUnreadNotificationCount(http: HttpClient, rootUrl: string, pa
   );
 }
 
-getUnreadNotificationCount.PATH = '/api/notifications/count';
+getUnreadNotificationCount.PATH = '/api/v1/chats/notifications/count';

@@ -27,4 +27,4 @@ export function getGroupStatisticsForTeacher(http: HttpClient, rootUrl: string, 
   );
 }
 
-getGroupStatisticsForTeacher.PATH = '/api/statistics/groups/teacher';
+getGroupStatisticsForTeacher.PATH = '/api/v1/groups/statistics/groups/teacher';

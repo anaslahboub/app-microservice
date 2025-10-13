@@ -27,4 +27,4 @@ export function getGroupStatistics(http: HttpClient, rootUrl: string, params?: G
   );
 }
 
-getGroupStatistics.PATH = '/api/statistics/groups';
+getGroupStatistics.PATH = '/api/v1/groups/statistics/groups';

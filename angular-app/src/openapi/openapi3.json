@@ -302,7 +302,7 @@
         }
       }
     },
-    "/api/v1/files/upload": {
+    "/api/v1/post/files/upload": {
       "post": {
         "tags": [
           "File"
@@ -765,12 +765,35 @@
         }
       }
     },
-    "/api/v1/files/debug/info": {
+    "/api/v1/post/files/debug/info": {
       "get": {
         "tags": [
           "File"
         ],
         "operationId": "getDebugInfo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/post/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "operationId": "healthCheck",
         "responses": {
           "200": {
             "description": "OK",
@@ -848,29 +871,6 @@
                 "schema": {
                   "type": "integer",
                   "format": "int64"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/health": {
-      "get": {
-        "tags": [
-          "Health"
-        ],
-        "operationId": "healthCheck",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-
-                  }
                 }
               }
             }
@@ -1086,10 +1086,10 @@
           "summary": {
             "type": "string"
           },
-          "pending": {
+          "rejected": {
             "type": "boolean"
           },
-          "rejected": {
+          "pending": {
             "type": "boolean"
           }
         }

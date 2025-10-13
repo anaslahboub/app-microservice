@@ -11,7 +11,7 @@
     }
   ],
   "paths": {
-    "/api/notifications/{notificationId}/read": {
+    "/api/v1/chats/notifications/{notificationId}/read": {
       "put": {
         "tags": [
           "notification-controller"
@@ -35,7 +35,7 @@
         }
       }
     },
-    "/api/notifications/read-all": {
+    "/api/v1/chats/notifications/read-all": {
       "put": {
         "tags": [
           "notification-controller"
@@ -44,91 +44,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/messages": {
-      "post": {
-        "tags": [
-          "Message"
-        ],
-        "operationId": "saveMessage",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MessageRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Created"
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "Message"
-        ],
-        "operationId": "setMessageToSeen",
-        "parameters": [
-          {
-            "name": "chat-id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "Accepted"
-          }
-        }
-      }
-    },
-    "/api/v1/messages/upload-media": {
-      "post": {
-        "tags": [
-          "Message"
-        ],
-        "operationId": "uploadMedia",
-        "parameters": [
-          {
-            "name": "chat-id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                },
-                "required": [
-                  "file"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created"
           }
         }
       }
@@ -192,7 +107,92 @@
         }
       }
     },
-    "/api/v1/users": {
+    "/api/v1/chats/messages": {
+      "post": {
+        "tags": [
+          "Message"
+        ],
+        "operationId": "saveMessage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Message"
+        ],
+        "operationId": "setMessageToSeen",
+        "parameters": [
+          {
+            "name": "chat-id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/api/v1/chats/messages/upload-media": {
+      "post": {
+        "tags": [
+          "Message"
+        ],
+        "operationId": "uploadMedia",
+        "parameters": [
+          {
+            "name": "chat-id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/v1/chats/users": {
       "get": {
         "tags": [
           "User"
@@ -215,7 +215,104 @@
         }
       }
     },
-    "/api/v1/messages/chat/{chat-id}": {
+    "/api/v1/chats/users/{id}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "getUserById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chats/notifications": {
+      "get": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "getUserNotifications",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chats/notifications/unread": {
+      "get": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "getUnreadUserNotifications",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chats/notifications/count": {
+      "get": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "getUnreadNotificationCount",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chats/messages/chat/{chat-id}": {
       "get": {
         "tags": [
           "Message"
@@ -248,74 +345,7 @@
         }
       }
     },
-    "/api/notifications": {
-      "get": {
-        "tags": [
-          "notification-controller"
-        ],
-        "operationId": "getUserNotifications",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NotificationDTO"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/notifications/unread": {
-      "get": {
-        "tags": [
-          "notification-controller"
-        ],
-        "operationId": "getUnreadUserNotifications",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NotificationDTO"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/notifications/count": {
-      "get": {
-        "tags": [
-          "notification-controller"
-        ],
-        "operationId": "getUnreadNotificationCount",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int64"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/notifications/{notificationId}": {
+    "/api/v1/chats/notifications/{notificationId}": {
       "delete": {
         "tags": [
           "notification-controller"
@@ -342,6 +372,14 @@
   },
   "components": {
     "schemas": {
+      "StringResponse": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string"
+          }
+        }
+      },
       "MessageRequest": {
         "type": "object",
         "properties": {
@@ -365,80 +403,6 @@
           },
           "chatId": {
             "type": "string"
-          }
-        }
-      },
-      "StringResponse": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "string"
-          }
-        }
-      },
-      "UserResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "lastSeen": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "online": {
-            "type": "boolean"
-          }
-        }
-      },
-      "MessageResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "content": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "TEXT",
-              "IMAGE",
-              "VIDEO",
-              "AUDIO"
-            ]
-          },
-          "state": {
-            "type": "string",
-            "enum": [
-              "SENT",
-              "SEEN"
-            ]
-          },
-          "senderId": {
-            "type": "string"
-          },
-          "receiverId": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "media": {
-            "type": "string",
-            "format": "byte"
           }
         }
       },
@@ -469,6 +433,30 @@
             "type": "string"
           },
           "recipientOnline": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "lastSeen": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "online": {
             "type": "boolean"
           }
         }
@@ -527,6 +515,48 @@
           },
           "read": {
             "type": "boolean"
+          }
+        }
+      },
+      "MessageResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "content": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "TEXT",
+              "IMAGE",
+              "VIDEO",
+              "AUDIO"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "SENT",
+              "SEEN"
+            ]
+          },
+          "senderId": {
+            "type": "string"
+          },
+          "receiverId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "media": {
+            "type": "string",
+            "format": "byte"
           }
         }
       }

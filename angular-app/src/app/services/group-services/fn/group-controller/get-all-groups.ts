@@ -27,4 +27,4 @@ export function getAllGroups(http: HttpClient, rootUrl: string, params?: GetAllG
   );
 }
 
-getAllGroups.PATH = '/api/groups';
+getAllGroups.PATH = '/api/v1/groups';

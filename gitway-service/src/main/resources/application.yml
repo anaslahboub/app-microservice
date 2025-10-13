@@ -12,8 +12,21 @@ spring:
           enabled: true
           lower-case-service-id: false
 
+      routes:
+        - id: chat-service
+          uri: lb://CHAT-SERVICE
+          predicates:
+            - Path=/api/v1/chats/**
 
+        - id: group-service
+          uri: lb://GROUP-SERVICE
+          predicates:
+            - Path=/api/v1/groups/**
 
+        - id: post-service
+          uri: lb://POST-SERVICE
+          predicates:
+            - Path=/api/v1/posts/**
 eureka:
   client:
     service-url:

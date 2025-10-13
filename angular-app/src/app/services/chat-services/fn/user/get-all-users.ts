@@ -27,4 +27,4 @@ export function getAllUsers(http: HttpClient, rootUrl: string, params?: GetAllUs
   );
 }
 
-getAllUsers.PATH = '/api/v1/users';
+getAllUsers.PATH = '/api/v1/chats/users';

@@ -31,4 +31,4 @@ export function updateGroup(http: HttpClient, rootUrl: string, params: UpdateGro
   );
 }
 
-updateGroup.PATH = '/api/groups/{id}';
+updateGroup.PATH = '/api/v1/groups/{id}';

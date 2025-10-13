@@ -32,4 +32,4 @@ export function uploadFile(http: HttpClient, rootUrl: string, params: UploadFile
   );
 }
 
-uploadFile.PATH = '/api/v1/files/upload';
+uploadFile.PATH = '/api/v1/post/files/upload';

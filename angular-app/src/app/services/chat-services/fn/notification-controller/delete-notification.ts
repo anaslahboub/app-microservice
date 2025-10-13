@@ -28,4 +28,4 @@ export function deleteNotification(http: HttpClient, rootUrl: string, params: De
   );
 }
 
-deleteNotification.PATH = '/api/notifications/{notificationId}';
+deleteNotification.PATH = '/api/v1/chats/notifications/{notificationId}';

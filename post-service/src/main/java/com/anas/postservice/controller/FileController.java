@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/files")
+@RequestMapping("/api/v1/post/files")
 @RequiredArgsConstructor
 @Tag(name = "File")
 public class FileController {

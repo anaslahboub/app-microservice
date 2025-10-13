@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/statistics")
+@RequestMapping("/api/v1/groups/statistics")
 @RequiredArgsConstructor
 public class StatisticsController {
 

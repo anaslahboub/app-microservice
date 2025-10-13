@@ -30,4 +30,4 @@ export function deletePost(http: HttpClient, rootUrl: string, params: DeletePost
   );
 }
 
-deletePost.PATH = '/api/groups/{groupId}/posts/{postId}';
+deletePost.PATH = '/api/v1/groups/{groupId}/posts/{postId}';
