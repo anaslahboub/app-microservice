@@ -1,10 +1,10 @@
 import {Component, input, InputSignal, output} from '@angular/core';
-import {ChatResponse} from '../../chat-services/models/chat-response';
+import {ChatResponse} from '../../services/chat-services/models/chat-response';
 import {DatePipe} from '@angular/common';
-import {UserResponse} from '../../chat-services/models/user-response';
-import { Api } from '../../chat-services/api';
+import {UserResponse} from '../../services/chat-services/models/user-response';
+import { Api } from '../../services/chat-services/api';
 import { KeycloakService } from '../../utils/keycloak/KeycloakService';
-import { getAllUsers } from '../../chat-services/functions';
+import { getAllUsers } from '../../services/chat-services/functions';
 import { HttpClient, HttpParams, HttpContext } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 

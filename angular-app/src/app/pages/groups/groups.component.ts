@@ -4,14 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { KeycloakService } from '../../utils/keycloak/KeycloakService';
 import { GroupApiService } from '../../services/group-api.service';
-import { GroupDto, GroupPostDto, GroupMemberDto } from '../../group-services/models';
-import { UserResponse } from '../../chat-services/models';
+import { GroupDto, GroupPostDto, GroupMemberDto } from '../../services/group-services/models';
+import { UserResponse } from '../../services/chat-services/models';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 
 import * as Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
-import { Api } from '../../chat-services/api';
-import { getAllUsers } from '../../chat-services/functions';
+import { Api } from '../../services/chat-services/api';
+import { getAllUsers } from '../../services/chat-services/functions';
 
 /**
  * Main Groups Component - Advanced Group Management System

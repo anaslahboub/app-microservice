@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatNotificationService } from '../../services/chat-notification.service';
 import { GroupNotificationService } from '../../services/group-notification.service';
-import { NotificationDto as ChatNotificationDto } from '../../chat-services/models/notification-dto';
-import { NotificationDto as GroupNotificationDto } from '../../group-services/models/notification-dto';
+import { NotificationDto as ChatNotificationDto } from '../../services/chat-services/models/notification-dto';
+import { NotificationDto as GroupNotificationDto } from '../../services/group-services/models/notification-dto';
 
 // Define a unified interface for the component
 interface UnifiedNotification {

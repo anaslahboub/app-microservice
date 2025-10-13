@@ -1,28 +1,28 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { ApiConfiguration } from '../group-services/api-configuration';
-import { GroupDto, GroupMemberDto, GroupPostDto } from '../group-services/models';
-import { UserResponse } from '../chat-services/models';
+import { ApiConfiguration } from './group-services/api-configuration';
+import { UserResponse } from './chat-services/models';
 
 // Import the generated API functions
-import { getGroupsByUserId } from '../group-services/fn/group-controller/get-groups-by-user-id';
-import { getGroupMembers } from '../group-services/fn/group-member-controller/get-group-members';
-import { getStudentsByGroupId } from '../group-services/fn/group-member-controller/get-students-by-group-id';
-import { getAllStudents } from '../group-services/fn/student-controller/get-all-students';
-import { searchGroups } from '../group-services/fn/group-controller/search-groups';
-import { getPublishedPosts } from '../group-services/fn/group-post-controller/get-published-posts';
-import { createPost } from '../group-services/fn/group-post-controller/create-post';
-import { deletePost } from '../group-services/fn/group-post-controller/delete-post';
-import { addMember } from '../group-services/fn/group-member-controller/add-member';
-import { removeMember } from '../group-services/fn/group-member-controller/remove-member';
-import { designateCoAdmin } from '../group-services/fn/group-member-controller/designate-co-admin';
-import { archiveGroup } from '../group-services/fn/group-controller/archive-group';
-import { deleteGroup } from '../group-services/fn/group-controller/delete-group';
-import { uploadFile } from '../group-services/fn/group-post-controller/upload-file';
-import { downloadFile } from '../group-services/fn/group-post-controller/download-file';
-import { createGroup } from '../group-services/fn/group-controller/create-group';
-import { updateGroup } from '../group-services/fn/group-controller/update-group';
+import { getGroupsByUserId } from './group-services/fn/group-controller/get-groups-by-user-id';
+import { getGroupMembers } from './group-services/fn/group-member-controller/get-group-members';
+import { getStudentsByGroupId } from './group-services/fn/group-member-controller/get-students-by-group-id';
+import { getAllStudents } from './group-services/fn/student-controller/get-all-students';
+import { searchGroups } from './group-services/fn/group-controller/search-groups';
+import { getPublishedPosts } from './group-services/fn/group-post-controller/get-published-posts';
+import { createPost } from './group-services/fn/group-post-controller/create-post';
+import { deletePost } from './group-services/fn/group-post-controller/delete-post';
+import { addMember } from './group-services/fn/group-member-controller/add-member';
+import { removeMember } from './group-services/fn/group-member-controller/remove-member';
+import { designateCoAdmin } from './group-services/fn/group-member-controller/designate-co-admin';
+import { archiveGroup } from './group-services/fn/group-controller/archive-group';
+import { deleteGroup } from './group-services/fn/group-controller/delete-group';
+import { uploadFile } from './group-services/fn/group-post-controller/upload-file';
+import { downloadFile } from './group-services/fn/group-post-controller/download-file';
+import { createGroup } from './group-services/fn/group-controller/create-group';
+import { updateGroup } from './group-services/fn/group-controller/update-group';
+import { GroupDto, GroupMemberDto, GroupPostDto } from './group-services/models';
 
 @Injectable({
   providedIn: 'root'

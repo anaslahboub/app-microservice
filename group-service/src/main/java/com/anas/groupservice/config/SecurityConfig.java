@@ -49,16 +49,6 @@ public class SecurityConfig {
                     .permitAll()
                 .requestMatchers( "/api/groups").hasAuthority("TEACHER")
                 .requestMatchers( "/api/groups/**").hasAuthority("TEACHER")
-//                .requestMatchers(HttpMethod.DELETE, "/api/groups/**").hasAuthority("TEACHER")
-//                .requestMatchers(HttpMethod.POST, "/api/groups/*/members").hasAuthority("TEACHER")
-//                .requestMatchers(HttpMethod.DELETE, "/api/groups/*/members/*").hasAuthority("TEACHER")
-//                .requestMatchers(HttpMethod.POST, "/api/groups/*/members/*/co-admin").hasAuthority("TEACHER")
-//                .requestMatchers(HttpMethod.GET, "/api/groups/**").authenticated()
-//                .requestMatchers(HttpMethod.POST, "/api/groups/*/members/*/leave").authenticated()
-//                .requestMatchers(HttpMethod.GET, "/api/admin/**").hasAuthority("ADMIN")
-//                .requestMatchers(HttpMethod.POST, "/api/admin/**").hasAuthority("ADMIN")
-//                .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasAuthority("ADMIN")
-//                .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
@@ -68,17 +58,17 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:4200","http://localhost:8082"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowedOrigins(List.of("http://localhost:4200","http://localhost:8082"));
-        configuration.setAllowCredentials(true);
-        
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOriginPatterns(List.of("http://localhost:4200","http://localhost:8082"));
+//        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//        configuration.setAllowedHeaders(List.of("*"));
+//        configuration.setAllowedOrigins(List.of("http://localhost:4200","http://localhost:8082"));
+//        configuration.setAllowCredentials(true);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 }

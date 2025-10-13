@@ -2,11 +2,15 @@ package com.anas.postservice.entities;
 
 
 import com.anas.postservice.common.BaseAuditingEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 import static jakarta.persistence.GenerationType.SEQUENCE;
 
@@ -16,7 +20,10 @@ import static jakarta.persistence.GenerationType.SEQUENCE;
 @NoArgsConstructor
 @Entity
 @Table(name = "comments")
-public class Comment extends BaseAuditingEntity {
+public class Comment extends BaseAuditingEntity implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    
     @Id
     @SequenceGenerator(name = "comment_id_seq", sequenceName = "comment_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = SEQUENCE, generator = "comment_id_seq")
@@ -27,6 +34,7 @@ public class Comment extends BaseAuditingEntity {
     
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
+    @JsonIgnore
     private Post post;
     
     // Store author ID directly instead of JPA relationship
@@ -34,6 +42,7 @@ public class Comment extends BaseAuditingEntity {
     
     @ManyToOne
     @JoinColumn(name = "parent_comment_id")
+    @JsonIgnore
     private Comment parentComment;
     
     private boolean approved = true;

@@ -1,5 +1,8 @@
 server:
   port: 8082
+  tomcat:
+    max-http-form-post-size: 1000MB
+    max-swallow-size: 1000MB
 
 spring:
   application:
@@ -23,7 +26,8 @@ spring:
           jwk-set-uri: http://localhost:8080/realms/myapp/protocol/openid-connect/certs
   servlet:
     multipart:
-      max-file-size: 50MB
+      max-file-size: 1000MB
+      max-request-size: 1000MB
 
 eureka:
   instance:

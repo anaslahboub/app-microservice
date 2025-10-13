@@ -5,19 +5,19 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpContext, HttpResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { ApiConfiguration } from '../chat-services/api-configuration';
-import { StrictHttpResponse } from '../chat-services/strict-http-response';
-import { Api } from '../chat-services/api';
+import { ApiConfiguration } from './chat-services/api-configuration';
+import { StrictHttpResponse } from './chat-services/strict-http-response';
+import { Api } from './chat-services/api';
 
 // Import notification functions
-import { deleteNotification, getUserNotifications } from '../chat-services/functions';
-import { getUnreadUserNotifications } from '../chat-services/functions';
-import { getUnreadNotificationCount } from '../chat-services/functions';
-import { markAsRead } from '../chat-services/functions';
-import { markAllAsRead } from '../chat-services/functions';
+import { deleteNotification, getUserNotifications } from './chat-services/functions';
+import { getUnreadUserNotifications } from './chat-services/functions';
+import { getUnreadNotificationCount } from './chat-services/functions';
+import { markAsRead } from './chat-services/functions';
+import { markAllAsRead } from './chat-services/functions';
 
 // Import DTOs
-import { NotificationDto } from '../chat-services/models/notification-dto';
+import { NotificationDto } from './chat-services/models/notification-dto';
 
 /**
  * Service to handle notifications from chat-service only
