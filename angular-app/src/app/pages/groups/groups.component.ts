@@ -8,7 +8,7 @@ import { GroupDto, GroupPostDto, GroupMemberDto } from '../../services/group-ser
 import { UserResponse } from '../../services/chat-services/models';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 
-import * as Stomp from 'stompjs';
+import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { Api } from '../../services/chat-services/api';
 import { getAllUsers } from '../../services/chat-services/functions';
@@ -68,7 +68,7 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
   searchResults: GroupDto[] = [];
   
   /** WebSocket connection for real-time updates */
-  private stompClient: any = null;
+  private stompClient: Client | null = null;
   private isConnected = false;
   
   /** Reference to chat container for auto-scrolling */
@@ -137,28 +137,40 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
   private connectWebSocket(): void {
     try {
       const socket = new SockJS('http://localhost:8082/ws');
-      this.stompClient = Stomp.over(socket);
       
-      this.stompClient.connect({}, (frame: any) => {
+      this.stompClient = new Client({
+        webSocketFactory: () => socket,
+        debug: function (str) {
+          console.log('STOMP: ' + str);
+        },
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+      });
+
+      this.stompClient.onConnect = (frame) => {
         console.log('Connected to group WebSocket:', frame);
         this.isConnected = true;
         
         // Subscribe to group updates
-        this.stompClient.subscribe('/topic/group-updates', (message: any) => {
+        this.stompClient?.subscribe('/topic/group-updates', (message) => {
           const update = JSON.parse(message.body);
           this.handleGroupUpdate(update);
         });
         
         // Subscribe to post updates
-        this.stompClient.subscribe('/topic/group-posts', (message: any) => {
+        this.stompClient?.subscribe('/topic/group-posts', (message) => {
           const post = JSON.parse(message.body);
           this.handleNewPost(post);
         });
-        
-      }, (error: any) => {
-        console.error('WebSocket connection error:', error);
-        this.isConnected = false;
-      });
+      };
+
+      this.stompClient.onStompError = (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+      };
+
+      this.stompClient.activate();
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
     }
@@ -169,7 +181,7 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
    */
   private disconnectWebSocket(): void {
     if (this.stompClient && this.isConnected) {
-      this.stompClient.disconnect();
+      this.stompClient.deactivate();
       this.isConnected = false;
     }
   }

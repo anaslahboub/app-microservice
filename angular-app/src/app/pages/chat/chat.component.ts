@@ -1,7 +1,7 @@
 import {AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ChatResponse} from '../../services/chat-services/models/chat-response';
 import {DatePipe} from '@angular/common';
-import * as Stomp from 'stompjs';
+import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import {FormsModule} from '@angular/forms';
 import {PickerComponent} from '@ctrl/ngx-emoji-mart';
@@ -32,7 +32,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewChecked {
   selectedChat: ChatResponse = {};
   chats: Array<ChatResponse> = [];
   chatMessages: Array<MessageResponse> = [];
-  socketClient: any = null;
+  socketClient: Client | null = null;
   messageContent: string = '';
   showEmojis = false;
   @ViewChild('scrollableDiv') scrollableDiv!: ElementRef<HTMLDivElement>;
@@ -51,7 +51,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   ngOnDestroy(): void {
     if (this.socketClient !== null) {
-      this.socketClient.disconnect();
+      this.socketClient.deactivate();
       this.notificationSubscription.unsubscribe();
       this.socketClient = null;
     }
@@ -181,21 +181,37 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   private initWebSocket() {
     if (this.keycloakService.keycloak?.tokenParsed?.sub) {
-      let ws = new SockJS('http://localhost:8081/ws');
-      this.socketClient = Stomp.over(ws);
-      const subUrl = `/user/${this.keycloakService.keycloak.tokenParsed?.sub}/chat`;
-      this.socketClient.connect({'Authorization': 'Bearer ' + this.keycloakService.keycloak.token},
-        () => {
-          this.notificationSubscription = this.socketClient.subscribe(subUrl,
-            (message: any) => {
-              const notification: NotificationDto = JSON.parse(message.body);
-              this.handleNotification(notification);
+      const ws = new SockJS('http://localhost:8081/ws');
+      
+      this.socketClient = new Client({
+        webSocketFactory: () => ws,
+        connectHeaders: {
+          'Authorization': 'Bearer ' + this.keycloakService.keycloak.token
+        },
+        debug: function (str) {
+          console.log('STOMP: ' + str);
+        },
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+      });
 
-            },
-            () => console.error('Error while connecting to webSocket')
-            );
-        }
-      );
+      const subUrl = `/user/${this.keycloakService.keycloak.tokenParsed?.sub}/chat`;
+      
+      this.socketClient.onConnect = (frame) => {
+        console.log('Connected: ' + frame);
+        this.notificationSubscription = this.socketClient?.subscribe(subUrl, (message) => {
+          const notification: NotificationDto = JSON.parse(message.body);
+          this.handleNotification(notification);
+        });
+      };
+
+      this.socketClient.onStompError = (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+      };
+
+      this.socketClient.activate();
     }
   }
 
