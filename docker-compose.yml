@@ -5,7 +5,6 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: anas
       POSTGRES_PASSWORD: anas
@@ -18,6 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
   pgadmin4:
     image: dpage/pgadmin4
@@ -32,6 +33,8 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
+    networks:
+      - app-network
 
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
@@ -63,19 +66,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-
-#  chat-service:
-#    build: ./chat-service
-#    container_name: chat-service
-#    restart: always
-#    ports:
-#      - 8081:8080
-#    environment:
-#      - SPRING_PROFILES_ACTIVE=docker
-#    depends_on:
-#      - postgres
-#    volumes:
-#      - ./chat-service:/app
+    networks:
+      - app-network
 
   redis:
     image: redis:7
@@ -86,11 +78,90 @@ services:
     command: [ "redis-server", "--appendonly", "yes" ]
     volumes:
       - redis_data:/data
+    networks:
+      - app-network
+
+  discovery-service:
+    build: ./discovery-service
+    container_name: discovery-service
+    ports:
+      - 8761:8761
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+    networks:
+      - app-network
+  
+  gitway-service:
+    build: ./gitway-service
+    container_name: gitway-service
+    ports:
+      - 7777:7777
+    depends_on:
+      - discovery-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - app-network
+
+  chat-service:
+    build: ./chat-service
+    container_name: chat-service
+    ports:
+      - 8081:8081
+    depends_on:
+      - redis
+      - postgres
+      - gitway-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - app-network
+
+  group-service:
+    build: ./group-service
+    container_name: group-service
+    ports:
+      - 8082:8082
+    depends_on:
+      - redis
+      - postgres
+      - gitway-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - app-network
+
+  post-service:
+    build: ./post-service
+    container_name: post-service
+    ports:
+      - 8083:8083
+    depends_on:
+      - redis
+      - postgres
+      - gitway-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - app-network
+
+#  angular-app:
+#    build: ./angular-app
+#    container_name: angular-app
+#    ports:
+#      - 4200:4200
+
+
 
 
 volumes:
   postgres_data:
   pgadmin_data:
-  # Named volume for Keycloak data persistence
   keycloak_data:
   redis_data:
+
+
+networks:
+  app-network:
+    driver: bridge

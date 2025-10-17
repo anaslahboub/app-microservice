@@ -11,9 +11,8 @@ FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
-# Copy the built JAR file
-COPY --from=build /app/target/group-service*.jar app.jar
+COPY --from=build /app/target/gitway-service*.jar app.jar
 
-EXPOSE 8082
+EXPOSE 7777
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

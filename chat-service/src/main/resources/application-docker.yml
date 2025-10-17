@@ -3,7 +3,7 @@ spring:
     name: chat-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/chat-db
+    url: jdbc:postgresql://postgres:5432/chat-db
     username: anas
     password: anas
 
@@ -21,8 +21,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/myapp
-          jwk-set-uri: http://localhost:8080/realms/myapp/protocol/openid-connect/certs
+          issuer-uri: http://keycloak:8080/realms/myapp
+          jwk-set-uri: http://keycloak:8080/realms/myapp/protocol/openid-connect/certs
 
   servlet:
     multipart:
@@ -32,7 +32,7 @@ spring:
   data:
     redis:
       port: 6379
-      host: localhost
+      host: redis
       timeout: 60000
 
 server:
@@ -46,7 +46,7 @@ eureka:
     prefer-ip-address: true
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://discovery-service:8761/eureka
 
 springdoc:
   default-produces-media-type: application/json

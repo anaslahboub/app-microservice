@@ -1,42 +1,47 @@
 spring:
   application:
-    name: chat-service
-
+    name: post-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/chat-db
+    url: jdbc:postgresql://localhost:5432/post-db
     username: anas
     password: anas
-
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
   flyway:
     enabled: false
-
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8080/realms/myapp
           jwk-set-uri: http://localhost:8080/realms/myapp/protocol/openid-connect/certs
-
   servlet:
     multipart:
       max-file-size: 1000MB
       max-request-size: 1000MB
-
+  # Jackson configuration for Java 8 time types
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      write-date-timestamps-as-nanoseconds: false
+  cache:
+    type: redis
+    redis:
+      time-to-live: 900000 # 1 minute en ms pour les tests
+      cache-null-values: false
+      enable_lazy_load_no_trans: true
   data:
     redis:
-      port: 6379
       host: localhost
-      timeout: 60000
+      port: 6379
+      timeout: 2000ms
 
 server:
-  port: 8081
+  port: 8083
   tomcat:
     max-http-form-post-size: 1000MB
     max-swallow-size: 1000MB
@@ -53,4 +58,14 @@ springdoc:
 application:
   file:
     uploads:
-      media-output-path: ./chat-uploads
+      post-output-path: ./post-uploads
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+

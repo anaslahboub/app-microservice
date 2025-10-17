@@ -8,7 +8,7 @@ import { GroupDto, GroupPostDto, GroupMemberDto } from '../../services/group-ser
 import { UserResponse } from '../../services/chat-services/models';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 
-import * as Stomp from 'stompjs';
+import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { Api } from '../../services/chat-services/api';
 import { getAllUsers } from '../../services/chat-services/functions';
@@ -137,9 +137,18 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
   private connectWebSocket(): void {
     try {
       const socket = new SockJS('http://localhost:8082/ws');
-      this.stompClient = Stomp.over(socket);
-      
-      this.stompClient.connect({}, (frame: any) => {
+      this.stompClient = new Client({
+        webSocketFactory: () => socket,
+        connectHeaders: {},
+        debug: (str) => {
+          console.log(str);
+        },
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+      });
+
+      this.stompClient.onConnect = (frame: any) => {
         console.log('Connected to group WebSocket:', frame);
         this.isConnected = true;
         
@@ -154,11 +163,14 @@ export class GroupsComponent implements OnInit, OnDestroy, AfterViewChecked {
           const post = JSON.parse(message.body);
           this.handleNewPost(post);
         });
-        
-      }, (error: any) => {
+      };
+
+      this.stompClient.onStompError = (error: any) => {
         console.error('WebSocket connection error:', error);
         this.isConnected = false;
-      });
+      };
+
+      this.stompClient.activate();
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
     }
