@@ -50,12 +50,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        // For development purposes, you might want to use a more specific URL in production
-        return NimbusJwtDecoder.withJwkSetUri("http://localhost:8080/realms/myapp/protocol/openid-connect/certs")
-                .build();
-    }
+
 
 //    @Bean
 //    public CorsFilter corsFilter() {
