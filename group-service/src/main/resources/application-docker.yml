@@ -1,59 +1,16 @@
-server:
-  port: 8082
-  tomcat:
-    max-http-form-post-size: 1000MB
-    max-swallow-size: 1000MB
+# ============================================
+# application-docker.yml (Gateway Service)
+# Crée ce fichier: gitway-service/src/main/resources/application-docker.yml
+# ============================================
 
 spring:
-  application:
-    name: group-service
-  datasource:
-    url: jdbc:postgresql://postgres:5432/group-db
-    username: anas
-    password: anas
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://keycloak:8080/realms/myapp
-          jwk-set-uri: http://keycloak:8080/realms/myapp/protocol/openid-connect/certs
-  servlet:
-    multipart:
-      max-file-size: 1000MB
-      max-request-size: 1000MB
+  config:
+    activate:
+      on-profile: docker
 
 eureka:
-  instance:
-    prefer-ip-address: true
   client:
     service-url:
       defaultZone: http://discovery-service:8761/eureka
-
-logging:
-  level:
-    com.anas.groupservice: DEBUG
-    org.springframework.web.socket: DEBUG
-    org.springframework.security: DEBUG
-
-# WebSocket configuration
-websocket:
-  allowed-origins: http://localhost:4200
-
-# Swagger configuration
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-  api-docs:
-    path: /v3/api-docs
-
-application:
-  file:
-    uploads:
-      group-output-path: ./group-uploads
+  instance:
+    prefer-ip-address: true

@@ -15,4 +15,4 @@ COPY --from=build /app/target/gitway-service*.jar app.jar
 
 EXPOSE 7777
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=docker", "-jar", "app.jar"]

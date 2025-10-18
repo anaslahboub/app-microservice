@@ -9,7 +9,6 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-    database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: false
@@ -68,4 +67,6 @@ management:
     health:
       show-details: always
 
-
+chat:
+  service:
+    url: http://localhost:8081

@@ -19,4 +19,4 @@ COPY --from=build /app/target/discovery-service*.jar app.jar
 
 EXPOSE 8761
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=docker", "-jar", "app.jar"]

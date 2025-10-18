@@ -33,8 +33,8 @@ public class ChatService {
                 .toList();
     }
     @Caching(evict = {
-            @CacheEvict(value = "chats",key = "senderId"),
-            @CacheEvict(value = "chats",key = "receiverId")
+            @CacheEvict(value = "chats",key = "#senderId"),
+            @CacheEvict(value = "chats",key = "#receiverId")
 
 
     })

@@ -7,12 +7,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "chat-service", url = "http://localhost:8081", configuration = com.anas.postservice.config.FeignConfig.class)
+@FeignClient(name = "chat-service", url = "${chat.service.url:http://localhost:8081}", configuration = com.anas.postservice.config.FeignConfig.class)
 public interface UserServiceClient {
     
-    @GetMapping("/api/v1/users")
+    @GetMapping("/api/v1/chats/users")
     List<User> getAllUsers();
     
-    @GetMapping("/api/v1/users/{id}")
+    @GetMapping("/api/v1/chats/users/{id}")
     User getUserById(@PathVariable("id") String id);
 }
