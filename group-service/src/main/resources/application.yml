@@ -3,7 +3,6 @@ server:
   tomcat:
     max-http-form-post-size: 1000MB
     max-swallow-size: 1000MB
-
 spring:
   application:
     name: group-service

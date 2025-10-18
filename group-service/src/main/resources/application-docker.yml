@@ -8,6 +8,17 @@ spring:
     activate:
       on-profile: docker
 
+  datasource:
+    url: jdbc:postgresql://postgres:5432/group-db
+    username: anas
+    password: anas
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/myapp
+          jwk-set-uri: http://keycloak:8080/realms/myapp/protocol/openid-connect/certs
+
 eureka:
   client:
     service-url:
