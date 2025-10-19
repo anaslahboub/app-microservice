@@ -131,6 +131,15 @@ services:
     networks:
       - app-network
 
+  angular-app:
+    build: ./angular-app
+    container_name: angular-app
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    networks:
+      - app-network
+
 volumes:
   postgres_data:
   pgadmin_data:

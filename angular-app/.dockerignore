@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Distribution files
+dist/
+
+# Build artifacts
+.angular/
+.tmp/
+
+# IDE files
+.vscode/
+.idea/
+
+# Git files
+.git/
+.gitignore
+
+# Log files
+*.log
+
+# Environment files
+.env*
